@@ -39,8 +39,14 @@ class RiskManager:
         max_affordable = int(equity // entry_price)
         return max(0, min(shares, max_affordable))
 
-    def daily_loss_limit_hit(self, equity_start_of_day: float, equity_now: float) -> bool:
+    def daily_loss_limit_hit(
+        self, equity_start_of_day: float, equity_now: float, threshold_pct: float | None = None
+    ) -> bool:
+        """threshold_pct permite reutilizar esta misma logica para el freno
+        de perdida total (contra un baseline distinto al de "inicio del dia").
+        Por defecto usa max_daily_loss_pct."""
         if equity_start_of_day <= 0:
             return False
+        limit = self.max_daily_loss_pct if threshold_pct is None else threshold_pct
         loss_pct = (equity_start_of_day - equity_now) / equity_start_of_day * 100
-        return loss_pct >= self.max_daily_loss_pct
+        return loss_pct >= limit

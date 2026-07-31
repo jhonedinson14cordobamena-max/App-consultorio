@@ -46,3 +46,11 @@ def test_daily_loss_limit_hit():
     risk = make_risk(max_daily_loss_pct=3.0)
     assert risk.daily_loss_limit_hit(10_000, 9_600) is True
     assert risk.daily_loss_limit_hit(10_000, 9_800) is False
+
+
+def test_daily_loss_limit_hit_with_custom_threshold():
+    # el mismo metodo se reutiliza para el freno de perdida TOTAL con un
+    # umbral distinto al de max_daily_loss_pct
+    risk = make_risk(max_daily_loss_pct=3.0)
+    assert risk.daily_loss_limit_hit(10_000, 8_900, threshold_pct=10.0) is True
+    assert risk.daily_loss_limit_hit(10_000, 9_200, threshold_pct=10.0) is False
