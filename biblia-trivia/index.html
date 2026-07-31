@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trivia Bíblica — 120 Niveles</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<main id="app">
+
+  <!-- Menú principal -->
+  <section id="screen-menu" class="screen active">
+    <div class="card menu-card">
+      <h1>📖 Trivia Bíblica</h1>
+      <p class="subtitle">120 niveles de dificultad — de aprendiz a experto</p>
+      <button id="btn-play" class="btn btn-primary">Jugar</button>
+      <button id="btn-how-to-play" class="btn btn-secondary">Cómo jugar</button>
+    </div>
+  </section>
+
+  <!-- Cómo jugar -->
+  <section id="screen-howto" class="screen">
+    <div class="card">
+      <h2>Cómo jugar</h2>
+      <ul class="howto-list">
+        <li>Hay <strong>120 niveles</strong>, agrupados en 12 temas bíblicos (Génesis, Patriarcas, Éxodo, Reyes, Profetas, Jesús, Parábolas, Apóstoles, Cartas, Apocalipsis, y más).</li>
+        <li>Cada nivel es una ronda corta de preguntas de opción múltiple.</li>
+        <li>A medida que subes de nivel, tienes <strong>menos tiempo</strong> por pregunta, <strong>menos vidas</strong> y necesitas <strong>más aciertos</strong> para pasar.</li>
+        <li>Responder rápido y correctamente da más puntos.</li>
+        <li>Si te quedas sin vidas o no llegas a los aciertos requeridos, puedes reintentar el nivel.</li>
+        <li>Tu progreso se guarda automáticamente en este navegador.</li>
+      </ul>
+      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+    </div>
+  </section>
+
+  <!-- Selección de niveles -->
+  <section id="screen-levels" class="screen">
+    <div class="card levels-card">
+      <div class="levels-header">
+        <h2>Selecciona un nivel</h2>
+        <div class="stats">
+          <span>Progreso: <strong id="progress-text">0 / 120</strong></span>
+          <span>Puntos totales: <strong id="total-score">0</strong></span>
+        </div>
+      </div>
+      <div id="level-grid" class="level-grid"></div>
+      <div class="levels-footer">
+        <button class="btn btn-secondary btn-back-menu">Menú</button>
+        <button id="btn-reset-progress" class="btn btn-danger">Reiniciar progreso</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Juego -->
+  <section id="screen-game" class="screen">
+    <div class="card game-card">
+      <div class="game-header">
+        <div>
+          <span id="game-level-label" class="level-label">Nivel 1</span>
+          <span id="game-tier-label" class="tier-label">Génesis y la Creación</span>
+        </div>
+        <button id="btn-back-levels" class="btn btn-tiny">✕</button>
+      </div>
+
+      <div class="hud">
+        <span id="hud-lives">❤️❤️❤️</span>
+        <span id="hud-progress">1 / 5</span>
+        <span id="hud-score">0</span>
+        <span id="hud-pass" class="hud-pass"></span>
+      </div>
+
+      <div class="timer-track"><div id="timer-bar" class="timer-bar"></div></div>
+
+      <h3 id="question-text" class="question-text">¿Pregunta?</h3>
+      <div id="options" class="options"></div>
+    </div>
+  </section>
+
+  <!-- Resultado de nivel -->
+  <section id="screen-result" class="screen">
+    <div class="card result-card">
+      <h2 id="result-title">Resultado</h2>
+      <p id="result-detail"></p>
+      <p id="result-score" class="result-score"></p>
+      <div class="result-actions">
+        <button id="btn-retry-level" class="btn btn-secondary">Reintentar</button>
+        <button id="btn-next-level" class="btn btn-primary">Siguiente nivel</button>
+        <button class="btn btn-tertiary btn-back-menu" id="btn-back-levels-2">Menú</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/questions.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
