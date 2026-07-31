@@ -13,6 +13,11 @@
  *   - Niveles 101-120: requieren además la suscripción "tier120".
  *   - Al completar el nivel 120 con "tier120", el backend marca la fecha
  *     de finalización y se puede descargar un certificado de obsequio.
+ *
+ * Idiomas: todo el contenido (preguntas, enseñanzas, personajes, Torá y
+ * Talmud) y los textos de la interfaz se resuelven a través de js/i18n.js,
+ * que decide qué idioma mostrar y cae de vuelta al español si falta una
+ * traducción para el idioma activo.
  */
 
 const TOTAL_LEVELS = 120;
@@ -38,6 +43,7 @@ const state = {
   pendingLevel: null,
   pendingTier: null,
   prices: { tier100Cop: 38000, tier120Cop: 15000 },
+  torah: null, // estado de la ronda del modo Torá y Talmud
 };
 
 /* ---------- Persistencia local (solo niveles 1-20, gratis) ---------- */
@@ -123,7 +129,7 @@ function shuffle(arr) {
 }
 
 function pickQuestions(tier, count) {
-  const pool = QUESTION_BANK[tier] || [];
+  const pool = getQuestionBank()[tier] || [];
   const chosen = shuffle(pool).slice(0, Math.min(count, pool.length));
   return chosen.map((item) => {
     const options = item.options.map((text, idx) => ({ text, isCorrect: idx === item.correct }));
@@ -149,6 +155,41 @@ function isScreenActive(id) {
   return document.getElementById(id).classList.contains("active");
 }
 
+function getActiveScreenId() {
+  const el = document.querySelector(".screen.active");
+  return el ? el.id : null;
+}
+
+/* ---------- Idioma ---------- */
+
+function setupLanguageSwitcher() {
+  const select = document.getElementById("lang-select");
+  select.innerHTML = "";
+  SUPPORTED_LANGUAGES.forEach((lang) => {
+    const opt = document.createElement("option");
+    opt.value = lang.code;
+    opt.textContent = lang.label;
+    select.appendChild(opt);
+  });
+  select.value = getLang();
+
+  select.addEventListener("change", () => {
+    setLang(select.value);
+    onLanguageChanged();
+  });
+}
+
+/** Vuelve a pintar los textos estáticos y cualquier contenido dinámico visible tras cambiar de idioma. */
+function onLanguageChanged() {
+  applyStaticTranslations();
+  renderAccountBar();
+
+  const activeScreen = getActiveScreenId();
+  if (activeScreen === "screen-levels") renderLevelGrid();
+  if (activeScreen === "screen-characters") renderCharacterGallery();
+  if (activeScreen === "screen-certificate") renderCertificate();
+}
+
 /* ---------- Barra de cuenta (menú) ---------- */
 
 function renderAccountBar() {
@@ -157,14 +198,14 @@ function renderAccountBar() {
   const certBtn = document.getElementById("btn-certificate");
 
   if (state.account) {
-    const tierLabel = { free: "sin suscripción de pago", tier100: "acceso hasta el nivel 100", tier120: "acceso hasta el nivel 120" }[
+    const tierKey = { free: "account.tierFree", tier100: "account.tier100", tier120: "account.tier120" }[
       state.serverProgress ? state.serverProgress.tier : "free"
     ];
-    bar.textContent = `Conectado como ${state.account.name} (${tierLabel}).`;
+    bar.textContent = t("account.loggedIn", { name: state.account.name, tier: t(tierKey) });
     logoutBtn.style.display = "inline-block";
     certBtn.style.display = state.serverProgress && state.serverProgress.completed_at ? "inline-block" : "none";
   } else {
-    bar.textContent = "Los niveles 1-20 son gratis. Crea una cuenta cuando quieras continuar más allá.";
+    bar.textContent = t("account.loggedOut");
     logoutBtn.style.display = "none";
     certBtn.style.display = "none";
   }
@@ -175,12 +216,13 @@ function renderAccountBar() {
 function renderLevelGrid() {
   const grid = document.getElementById("level-grid");
   grid.innerHTML = "";
+  const tierInfo = getTierInfo();
 
   for (let lvl = 1; lvl <= TOTAL_LEVELS; lvl++) {
     const tier = Math.min(12, Math.ceil(lvl / 10));
     const btn = document.createElement("button");
-    btn.style.setProperty("--tier-color", TIER_INFO[tier].color);
-    btn.title = TIER_INFO[tier].name;
+    btn.style.setProperty("--tier-color", tierInfo[tier].color);
+    btn.title = tierInfo[tier].name;
 
     if (lvl <= FREE_LEVELS) {
       const locked = lvl > state.unlockedLevel;
@@ -228,7 +270,7 @@ function renderLevelGrid() {
 function renderCharacterGallery() {
   const list = document.getElementById("characters-list");
   list.innerHTML = "";
-  CHARACTER_GALLERY.forEach((group) => {
+  getCharacterGallery().forEach((group) => {
     const section = document.createElement("div");
     section.className = "character-group";
 
@@ -281,7 +323,7 @@ function handleLockedPaidLevel(level) {
     showPaywallScreen(requiredTier);
   } else {
     state.pendingLevel = null;
-    alert("Primero debes superar los niveles anteriores para llegar hasta aquí.");
+    alert(t("game.needPayment"));
   }
 }
 
@@ -331,12 +373,8 @@ function showPaywallScreen(tier) {
   state.pendingTier = tier;
   const price = tier === "tier100" ? state.prices.tier100Cop : state.prices.tier120Cop;
 
-  document.getElementById("paywall-title").textContent =
-    tier === "tier100" ? "Continúa hasta el nivel 100" : "Completa hasta el nivel 120";
-  document.getElementById("paywall-detail").textContent =
-    tier === "tier100"
-      ? "Los niveles 1 al 20 son gratis. Para continuar del nivel 21 al 100 se requiere esta suscripción única."
-      : "Ya tienes acceso hasta el nivel 100. Para completar hasta el nivel 120 —y obtener tu certificado— se requiere este pago adicional.";
+  document.getElementById("paywall-title").textContent = t(tier === "tier100" ? "paywall.title100" : "paywall.title120");
+  document.getElementById("paywall-detail").textContent = t(tier === "tier100" ? "paywall.detail100" : "paywall.detail120");
   document.getElementById("paywall-price").innerHTML = `$${price.toLocaleString("es-CO")}`;
   document.getElementById("paywall-status").textContent = "";
   showScreen("screen-paywall");
@@ -353,8 +391,8 @@ function startLevel(level) {
   state.lives = state.config.lives;
   state.score = 0;
 
-  document.getElementById("game-level-label").textContent = `Nivel ${level}`;
-  document.getElementById("game-tier-label").textContent = TIER_INFO[state.config.tier].name;
+  document.getElementById("game-level-label").textContent = t("game.level", { n: level });
+  document.getElementById("game-tier-label").textContent = getTierInfo()[state.config.tier].name;
   showScreen("screen-game");
   showQuestion();
 }
@@ -363,7 +401,7 @@ function updateHud() {
   document.getElementById("hud-lives").textContent = "❤️".repeat(Math.max(0, state.lives));
   document.getElementById("hud-score").textContent = state.score;
   document.getElementById("hud-progress").textContent = `${state.qIndex + 1} / ${state.questions.length}`;
-  document.getElementById("hud-pass").textContent = `Necesitas ${state.config.passCount} aciertos`;
+  document.getElementById("hud-pass").textContent = t("game.hudPass", { n: state.config.passCount });
 }
 
 function showQuestion() {
@@ -446,7 +484,7 @@ function registerAnswer(idx, item) {
 }
 
 function pickTeachingFor(tier) {
-  const pool = TEACHINGS[tier] || [];
+  const pool = getTeachings()[tier] || [];
   state.teaching = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
 }
 
@@ -489,18 +527,24 @@ async function finishPaidLevel(passed) {
 }
 
 function renderResultScreen(passed, syncError) {
-  document.getElementById("result-title").textContent = passed ? "¡Nivel superado!" : "Nivel fallido";
+  document.getElementById("result-title").textContent = t(passed ? "result.pass" : "result.fail");
   document.getElementById("result-title").className = passed ? "pass" : "fail";
 
-  let detail = `Respondiste bien ${state.correctCount} de ${state.questions.length} preguntas. Necesitabas ${state.config.passCount}.`;
+  let detail = t("result.detail", {
+    correct: state.correctCount,
+    total: state.questions.length,
+    needed: state.config.passCount,
+  });
   if (passed && state.currentLevel === TOTAL_LEVELS) {
-    detail += " ¡Has completado los 120 niveles!";
+    detail += t("result.allCompleted");
   }
   if (syncError) {
-    detail += ` (No se pudo sincronizar tu progreso con el servidor: ${syncError})`;
+    detail += t("result.syncError", { error: syncError });
   }
   document.getElementById("result-detail").textContent = detail;
-  document.getElementById("result-score").textContent = passed ? `+${state.score} puntos` : "0 puntos";
+  document.getElementById("result-score").textContent = passed
+    ? t("result.scorePass", { score: state.score })
+    : t("result.scoreFail");
 
   const nextBtn = document.getElementById("btn-next-level");
   nextBtn.style.display = passed && state.currentLevel < TOTAL_LEVELS ? "inline-block" : "none";
@@ -520,7 +564,7 @@ function renderTeaching(passed) {
   }
   box.style.display = "block";
   document.getElementById("teaching-lesson").textContent = state.teaching.lesson;
-  document.getElementById("teaching-application").textContent = "💡 Aplícalo: " + state.teaching.application;
+  document.getElementById("teaching-application").textContent = t("teaching.applyPrefix") + state.teaching.application;
   document.getElementById("teaching-challenge-q").textContent = state.teaching.challenge.q;
   document.getElementById("teaching-feedback").textContent = "";
   document.getElementById("teaching-feedback").className = "teaching-feedback";
@@ -552,7 +596,7 @@ async function answerTeachingChallenge(clickedBtn, isCorrect, shuffledOptions, o
 
   const feedback = document.getElementById("teaching-feedback");
   if (!isCorrect) {
-    feedback.textContent = "Esa no es la mejor aplicación. ¡Sigue practicando esta enseñanza en tu vida diaria!";
+    feedback.textContent = t("teaching.wrongFeedback");
     feedback.className = "teaching-feedback fail";
     return;
   }
@@ -570,8 +614,97 @@ async function answerTeachingChallenge(clickedBtn, isCorrect, shuffledOptions, o
     }
   }
   document.getElementById("total-score").textContent = combinedTotalScore();
-  feedback.textContent = `¡Correcto! +${bonus} puntos de bonus por aplicar la enseñanza.`;
+  feedback.textContent = t("teaching.correctFeedback", { bonus });
   feedback.className = "teaching-feedback pass";
+}
+
+/* ---------- Torá y Leyendas del Talmud (modo bonus, gratis) ---------- */
+
+function buildTorahRoundQuestions() {
+  const torahPool = getTorahQuestions().map((item) => ({ ...item, kind: "torah" }));
+  const legendPool = getTalmudLegends().map((item) => ({
+    kind: "legend",
+    q: item.q,
+    options: item.options,
+    correct: item.correct,
+    ref: item.source,
+    title: item.title,
+  }));
+  const combined = shuffle([...shuffle(torahPool).slice(0, 6), ...shuffle(legendPool).slice(0, 4)]);
+  return combined.map((item) => {
+    const options = item.options.map((text, idx) => ({ text, isCorrect: idx === item.correct }));
+    const shuffled = shuffle(options);
+    return {
+      kind: item.kind,
+      q: item.q,
+      ref: item.ref,
+      options: shuffled.map((o) => o.text),
+      correctIndex: shuffled.findIndex((o) => o.isCorrect),
+    };
+  });
+}
+
+function startTorahRound() {
+  state.torah = {
+    questions: buildTorahRoundQuestions(),
+    index: 0,
+    correct: 0,
+  };
+  showScreen("screen-torah-game");
+  showTorahQuestion();
+}
+
+function showTorahQuestion() {
+  const round = state.torah;
+  if (round.index >= round.questions.length) {
+    return endTorahRound();
+  }
+  const item = round.questions[round.index];
+  document.getElementById("torah-progress").textContent = `${round.index + 1} / ${round.questions.length}`;
+  document.getElementById("torah-badge").textContent = t(item.kind === "torah" ? "torah.badgeTorah" : "torah.badgeLegend");
+  document.getElementById("torah-question-text").textContent = item.q;
+  document.getElementById("torah-source").style.display = "none";
+
+  const optionsEl = document.getElementById("torah-options");
+  optionsEl.innerHTML = "";
+  item.options.forEach((opt, idx) => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = opt;
+    b.addEventListener("click", () => answerTorahQuestion(idx));
+    optionsEl.appendChild(b);
+  });
+}
+
+function answerTorahQuestion(idx) {
+  const round = state.torah;
+  const item = round.questions[round.index];
+  const buttons = document.querySelectorAll("#torah-options .option-btn");
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (i === item.correctIndex) b.classList.add("correct");
+    else if (i === idx) b.classList.add("wrong");
+  });
+
+  if (idx === item.correctIndex) round.correct++;
+
+  const sourceEl = document.getElementById("torah-source");
+  sourceEl.textContent = t("torah.source", { source: item.ref });
+  sourceEl.style.display = "block";
+
+  setTimeout(() => {
+    round.index++;
+    showTorahQuestion();
+  }, 1900);
+}
+
+function endTorahRound() {
+  const round = state.torah;
+  document.getElementById("torah-result-detail").textContent = t("torah.resultDetail", {
+    correct: round.correct,
+    total: round.questions.length,
+  });
+  showScreen("screen-torah-result");
 }
 
 /* ---------- Certificado ---------- */
@@ -594,43 +727,48 @@ function renderCertificate() {
   ctx.fillStyle = "#2b2016";
   ctx.textAlign = "center";
   ctx.font = "bold 42px Georgia";
-  ctx.fillText("Certificado de Finalización", w / 2, 140);
+  ctx.fillText(t("certificate.canvasTitle"), w / 2, 140);
 
   ctx.font = "24px Georgia";
-  ctx.fillText("Trivia Bíblica — 120 Niveles", w / 2, 185);
+  ctx.fillText(t("certificate.canvasSubtitle"), w / 2, 185);
 
   ctx.font = "italic 22px Georgia";
-  ctx.fillText("Se otorga el presente certificado a:", w / 2, 280);
+  ctx.fillText(t("certificate.canvasAwardedTo"), w / 2, 280);
 
   ctx.font = "bold 48px Georgia";
   ctx.fillStyle = "#6c5b7b";
-  const name = (state.account && state.account.name) || "Jugador";
+  const name = (state.account && state.account.name) || t("certificate.defaultName");
   ctx.fillText(name, w / 2, 350);
 
   ctx.fillStyle = "#2b2016";
   ctx.font = "20px Georgia";
-  ctx.fillText("por completar exitosamente los 120 niveles de dificultad,", w / 2, 420);
-  ctx.fillText("llevando las enseñanzas del pasado bíblico a la práctica en el presente.", w / 2, 450);
+  ctx.fillText(t("certificate.canvasLine1"), w / 2, 420);
+  ctx.fillText(t("certificate.canvasLine2"), w / 2, 450);
 
+  const dateLocale = getLang() === "en" ? "en-US" : "es-CO";
   const dateStr =
     state.serverProgress && state.serverProgress.completed_at
-      ? new Date(state.serverProgress.completed_at).toLocaleDateString("es-CO", {
+      ? new Date(state.serverProgress.completed_at).toLocaleDateString(dateLocale, {
           year: "numeric",
           month: "long",
           day: "numeric",
         })
-      : new Date().toLocaleDateString("es-CO");
+      : new Date().toLocaleDateString(dateLocale);
   ctx.font = "18px Georgia";
-  ctx.fillText(`Fecha: ${dateStr}`, w / 2, 520);
+  ctx.fillText(t("certificate.canvasDate", { date: dateStr }), w / 2, 520);
 
   ctx.font = "16px Georgia";
   ctx.fillStyle = "#8a7a5c";
-  ctx.fillText("📖 Trivia Bíblica", w / 2, 620);
+  ctx.fillText(t("certificate.canvasFooter"), w / 2, 620);
 }
 
 /* ---------- Eventos globales ---------- */
 
 document.addEventListener("DOMContentLoaded", () => {
+  setLang(detectInitialLanguage());
+  setupLanguageSwitcher();
+  applyStaticTranslations();
+
   loadProgress();
   renderAccountBar();
 
@@ -662,6 +800,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCharacterGallery();
     showScreen("screen-characters");
   });
+
+  document.getElementById("btn-torah").addEventListener("click", () => {
+    showScreen("screen-torah-intro");
+  });
+
+  document.getElementById("btn-torah-start").addEventListener("click", startTorahRound);
+  document.getElementById("btn-torah-again").addEventListener("click", startTorahRound);
+  document.getElementById("btn-torah-exit").addEventListener("click", () => showScreen("screen-torah-intro"));
 
   document.getElementById("btn-certificate").addEventListener("click", () => {
     renderCertificate();
@@ -699,7 +845,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("btn-reset-progress").addEventListener("click", () => {
-    if (confirm("¿Seguro que quieres borrar tu progreso GRATIS (niveles 1-20) y volver a empezar desde el nivel 1? Esto no afecta tu suscripción de pago si tienes una.")) {
+    if (confirm(t("levels.resetConfirm"))) {
       state.unlockedLevel = 1;
       state.totalScore = 0;
       saveProgress();
@@ -748,7 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
     statusEl.textContent = "";
     try {
       const { checkoutUrl } = await api.createCheckout(state.pendingTier);
-      statusEl.textContent = "Redirigiendo a Wompi...";
+      statusEl.textContent = t("paywall.redirecting");
       window.location.href = checkoutUrl;
     } catch (err) {
       statusEl.textContent = err.message;

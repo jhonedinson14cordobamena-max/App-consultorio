@@ -13,48 +13,89 @@
   <!-- Menú principal -->
   <section id="screen-menu" class="screen active">
     <div class="card menu-card">
-      <h1>📖 Trivia Bíblica</h1>
-      <p class="subtitle">120 niveles de dificultad — de aprendiz a experto</p>
-      <p class="mission">Este juego nació para traer las historias del pasado bíblico al presente: conocer a sus personajes no es solo un dato, sino una oportunidad de aplicar hoy —y en el futuro— lo que ellos vivieron.</p>
-      <p id="account-bar" class="account-bar"></p>
-      <div class="mystery-bonus">
-        🎁 <strong>Promoción:</strong> los suscriptores participan en la rifa de un bono por
-        <strong>un porcentaje que, por ahora, es una incógnita</strong>. ¡Pronto revelaremos de cuánto se trata!
+      <div class="lang-switcher">
+        <label for="lang-select" data-i18n="menu.langLabel">Idioma</label>
+        <select id="lang-select"></select>
       </div>
-      <button id="btn-play" class="btn btn-primary">Jugar</button>
-      <button id="btn-characters" class="btn btn-secondary">Personajes de la Biblia</button>
-      <button id="btn-certificate" class="btn btn-gold" style="display:none">🎓 Mi certificado</button>
-      <button id="btn-how-to-play" class="btn btn-secondary">Cómo jugar</button>
-      <button id="btn-logout" class="btn btn-tertiary" style="display:none">Cerrar sesión</button>
+      <h1 data-i18n="menu.title">📖 Trivia Bíblica</h1>
+      <p class="subtitle" data-i18n="menu.subtitle">120 niveles de dificultad — de aprendiz a experto</p>
+      <p class="mission" data-i18n="menu.mission">Este juego nació para traer las historias del pasado bíblico al presente...</p>
+      <p id="account-bar" class="account-bar"></p>
+      <div class="mystery-bonus" data-i18n-html="menu.mysteryBonus"></div>
+      <button id="btn-play" class="btn btn-primary" data-i18n="menu.btnPlay">Jugar</button>
+      <button id="btn-characters" class="btn btn-secondary" data-i18n="menu.btnCharacters">Personajes de la Biblia</button>
+      <button id="btn-torah" class="btn btn-secondary" data-i18n="menu.btnTorah">📜 Torá y Leyendas del Talmud</button>
+      <button id="btn-certificate" class="btn btn-gold" style="display:none" data-i18n="menu.btnCertificate">🎓 Mi certificado</button>
+      <button id="btn-how-to-play" class="btn btn-secondary" data-i18n="menu.btnHowTo">Cómo jugar</button>
+      <button id="btn-logout" class="btn btn-tertiary" style="display:none" data-i18n="menu.btnLogout">Cerrar sesión</button>
     </div>
   </section>
 
   <!-- Cómo jugar -->
   <section id="screen-howto" class="screen">
     <div class="card">
-      <h2>Cómo jugar</h2>
-      <p class="mission">Este juego se creó con un propósito: traer lo que ocurrió en el pasado bíblico al presente, para que puedas aplicarlo hoy y en tu futuro, no solo memorizarlo.</p>
+      <h2 data-i18n="howto.title">Cómo jugar</h2>
+      <p class="mission" data-i18n="howto.mission">...</p>
       <ul class="howto-list">
-        <li>Hay <strong>120 niveles</strong>, agrupados en 12 temas bíblicos (Génesis, Patriarcas, Éxodo, Reyes, Profetas, Jesús, Parábolas, Apóstoles, Cartas, Apocalipsis, y más), con personajes de toda la Biblia.</li>
-        <li>Cada nivel es una ronda corta de preguntas de opción múltiple.</li>
-        <li>A medida que subes de nivel, tienes <strong>menos tiempo</strong> por pregunta, <strong>menos vidas</strong> y necesitas <strong>más aciertos</strong> para pasar.</li>
-        <li>Responder rápido y correctamente da más puntos.</li>
-        <li>Al superar un nivel verás una <strong>enseñanza</strong>: qué hizo un personaje en el pasado, y cómo aplicar ese mismo ejemplo hoy y en el futuro, con un reto extra que da puntos de bonus.</li>
-        <li>Explora la <strong>Galería de Personajes</strong> desde el menú para conocer a más de 150 figuras de toda la Biblia, de Génesis a Apocalipsis.</li>
-        <li>Si te quedas sin vidas o no llegas a los aciertos requeridos, puedes reintentar el nivel.</li>
-        <li>Tu progreso se guarda automáticamente en este navegador.</li>
+        <li data-i18n-html="howto.li1"></li>
+        <li data-i18n="howto.li2"></li>
+        <li data-i18n-html="howto.li3"></li>
+        <li data-i18n="howto.li4"></li>
+        <li data-i18n-html="howto.li5"></li>
+        <li data-i18n-html="howto.li6"></li>
+        <li data-i18n="howto.li7"></li>
+        <li data-i18n="howto.li8"></li>
       </ul>
-      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+      <button class="btn btn-secondary btn-back-menu" data-i18n="howto.btnBack">Volver al menú</button>
     </div>
   </section>
 
   <!-- Galería de personajes -->
   <section id="screen-characters" class="screen">
     <div class="card characters-card">
-      <h2>Personajes de la Biblia</h2>
-      <p class="mission">Del pasado al presente: estos son los personajes cuyas historias inspiran las preguntas y enseñanzas del juego.</p>
+      <h2 data-i18n="characters.title">Personajes de la Biblia</h2>
+      <p class="mission" data-i18n="characters.mission">...</p>
       <div id="characters-list" class="characters-list"></div>
-      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+      <button class="btn btn-secondary btn-back-menu" data-i18n="characters.btnBack">Volver al menú</button>
+    </div>
+  </section>
+
+  <!-- Torá y Leyendas del Talmud: introducción -->
+  <section id="screen-torah-intro" class="screen">
+    <div class="card">
+      <h2 data-i18n="torah.menuTitle">Torá y Leyendas del Talmud</h2>
+      <p class="mission" data-i18n="torah.intro">...</p>
+      <p class="mission" data-i18n="torah.disclaimer">...</p>
+      <button id="btn-torah-start" class="btn btn-primary" data-i18n="torah.btnStart">Comenzar ronda (10 preguntas)</button>
+      <button class="btn btn-secondary btn-back-menu" data-i18n="torah.btnBack">Volver al menú</button>
+    </div>
+  </section>
+
+  <!-- Torá y Leyendas del Talmud: ronda de juego -->
+  <section id="screen-torah-game" class="screen">
+    <div class="card game-card">
+      <div class="game-header">
+        <div>
+          <span id="torah-progress" class="level-label">1 / 10</span>
+          <span id="torah-badge" class="tier-label"></span>
+        </div>
+        <button id="btn-torah-exit" class="btn btn-tiny">✕</button>
+      </div>
+      <h3 id="torah-question-text" class="question-text">¿Pregunta?</h3>
+      <div id="torah-options" class="options"></div>
+      <p id="torah-source" class="question-fact"></p>
+    </div>
+  </section>
+
+  <!-- Torá y Leyendas del Talmud: resultado -->
+  <section id="screen-torah-result" class="screen">
+    <div class="card result-card">
+      <h2 data-i18n="torah.resultTitle">Ronda completada</h2>
+      <p id="torah-result-detail"></p>
+      <div class="result-actions">
+        <button id="btn-torah-again" class="btn btn-primary" data-i18n="torah.btnPlayAgain">Jugar otra ronda</button>
+        <button class="btn btn-tertiary btn-back-menu" data-i18n="torah.btnBack">Volver al menú</button>
+      </div>
     </div>
   </section>
 
@@ -62,18 +103,18 @@
   <section id="screen-levels" class="screen">
     <div class="card levels-card">
       <div class="levels-header">
-        <h2>Selecciona un nivel</h2>
+        <h2 data-i18n="levels.title">Selecciona un nivel</h2>
         <div class="stats">
-          <span>Nivel gratis: <strong id="progress-text">0 / 20</strong></span>
-          <span id="paid-progress-text" style="display:none">Nivel de pago: <strong id="paid-progress-value">21 / 120</strong></span>
-          <span>Puntos totales: <strong id="total-score">0</strong></span>
+          <span><span data-i18n="levels.freeLevel">Nivel gratis:</span> <strong id="progress-text">0 / 20</strong></span>
+          <span id="paid-progress-text" style="display:none"><span data-i18n="levels.paidLevel">Nivel de pago:</span> <strong id="paid-progress-value">21 / 120</strong></span>
+          <span><span data-i18n="levels.totalPoints">Puntos totales:</span> <strong id="total-score">0</strong></span>
         </div>
       </div>
-      <p class="paywall-legend"><span class="badge-locked">🔒</span> por jugar &nbsp; <span class="badge-paid">🔒💳</span> requiere suscripción de pago</p>
+      <p class="paywall-legend" data-i18n-html="levels.legend"></p>
       <div id="level-grid" class="level-grid"></div>
       <div class="levels-footer">
-        <button class="btn btn-secondary btn-back-menu">Menú</button>
-        <button id="btn-reset-progress" class="btn btn-danger">Reiniciar progreso</button>
+        <button class="btn btn-secondary btn-back-menu" data-i18n="levels.btnMenu">Menú</button>
+        <button id="btn-reset-progress" class="btn btn-danger" data-i18n="levels.btnReset">Reiniciar progreso</button>
       </div>
     </div>
   </section>
@@ -112,7 +153,7 @@
       <p id="result-score" class="result-score"></p>
 
       <div id="teaching-box" class="teaching-box">
-        <h3>📘 Enseñanza de este nivel</h3>
+        <h3 data-i18n="teaching.title">📘 Enseñanza de este nivel</h3>
         <p id="teaching-lesson" class="teaching-lesson"></p>
         <p id="teaching-application" class="teaching-application"></p>
         <p id="teaching-challenge-q" class="challenge-prompt"></p>
@@ -121,9 +162,9 @@
       </div>
 
       <div class="result-actions">
-        <button id="btn-retry-level" class="btn btn-secondary">Reintentar</button>
-        <button id="btn-next-level" class="btn btn-primary">Siguiente nivel</button>
-        <button class="btn btn-tertiary btn-back-menu" id="btn-back-levels-2">Menú</button>
+        <button id="btn-retry-level" class="btn btn-secondary" data-i18n="result.btnRetry">Reintentar</button>
+        <button id="btn-next-level" class="btn btn-primary" data-i18n="result.btnNext">Siguiente nivel</button>
+        <button class="btn btn-tertiary btn-back-menu" id="btn-back-levels-2" data-i18n="result.btnMenu">Menú</button>
       </div>
     </div>
   </section>
@@ -131,29 +172,29 @@
   <!-- Autenticación -->
   <section id="screen-auth" class="screen">
     <div class="card">
-      <h2>Los niveles 1-20 son gratis</h2>
-      <p class="mission">Para continuar del nivel 21 en adelante necesitas una cuenta gratuita y, luego, una suscripción de pago. Crea tu cuenta o inicia sesión para seguir.</p>
+      <h2 data-i18n="auth.title">Los niveles 1-20 son gratis</h2>
+      <p class="mission" data-i18n="auth.mission">...</p>
 
       <div class="auth-tabs">
-        <button id="auth-tab-login" class="auth-tab active">Iniciar sesión</button>
-        <button id="auth-tab-register" class="auth-tab">Crear cuenta</button>
+        <button id="auth-tab-login" class="auth-tab active" data-i18n="auth.tabLogin">Iniciar sesión</button>
+        <button id="auth-tab-register" class="auth-tab" data-i18n="auth.tabRegister">Crear cuenta</button>
       </div>
 
       <form id="form-login" class="auth-form">
-        <label>Correo<input type="email" id="login-email" required autocomplete="email" /></label>
-        <label>Contraseña<input type="password" id="login-password" required autocomplete="current-password" /></label>
-        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+        <label><span data-i18n="auth.labelEmail">Correo</span><input type="email" id="login-email" required autocomplete="email" /></label>
+        <label><span data-i18n="auth.labelPassword">Contraseña</span><input type="password" id="login-password" required autocomplete="current-password" /></label>
+        <button type="submit" class="btn btn-primary" data-i18n="auth.btnLogin">Iniciar sesión</button>
       </form>
 
       <form id="form-register" class="auth-form" style="display:none">
-        <label>Nombre<input type="text" id="register-name" required autocomplete="name" /></label>
-        <label>Correo<input type="email" id="register-email" required autocomplete="email" /></label>
-        <label>Contraseña (mínimo 8 caracteres)<input type="password" id="register-password" required minlength="8" autocomplete="new-password" /></label>
-        <button type="submit" class="btn btn-primary">Crear cuenta</button>
+        <label><span data-i18n="auth.labelName">Nombre</span><input type="text" id="register-name" required autocomplete="name" /></label>
+        <label><span data-i18n="auth.labelEmail">Correo</span><input type="email" id="register-email" required autocomplete="email" /></label>
+        <label><span data-i18n="auth.labelPasswordMin">Contraseña (mínimo 8 caracteres)</span><input type="password" id="register-password" required minlength="8" autocomplete="new-password" /></label>
+        <button type="submit" class="btn btn-primary" data-i18n="auth.btnRegister">Crear cuenta</button>
       </form>
 
       <p id="auth-error" class="auth-error"></p>
-      <button class="btn btn-tertiary btn-back-levels-from-auth">Cancelar</button>
+      <button class="btn btn-tertiary btn-back-levels-from-auth" data-i18n="auth.btnCancel">Cancelar</button>
     </div>
   </section>
 
@@ -162,35 +203,34 @@
     <div class="card">
       <h2 id="paywall-title">Continúa tu progreso</h2>
       <p id="paywall-detail" class="mission"></p>
-      <p class="paywall-price"><strong id="paywall-price">$0</strong> COP</p>
-      <button id="btn-pay-wompi" class="btn btn-primary">Pagar con Wompi</button>
+      <p class="paywall-price"><strong id="paywall-price">$0</strong> <span data-i18n="paywall.currency">COP</span></p>
+      <button id="btn-pay-wompi" class="btn btn-primary" data-i18n="paywall.btnPay">Pagar con Wompi</button>
       <p id="paywall-status" class="auth-error"></p>
 
-      <div class="mystery-bonus">
-        🎁 <strong>Bono sorpresa:</strong> al suscribirte participas en la rifa de un bono por
-        <strong>un porcentaje que por ahora es una incógnita</strong> — ¡se revelará más adelante!
-      </div>
+      <div class="mystery-bonus" data-i18n-html="paywall.mysteryBonus"></div>
 
-      <button class="btn btn-tertiary btn-back-levels-from-auth">Cancelar</button>
+      <button class="btn btn-tertiary btn-back-levels-from-auth" data-i18n="auth.btnCancel">Cancelar</button>
     </div>
   </section>
 
   <!-- Certificado -->
   <section id="screen-certificate" class="screen">
     <div class="card certificate-card">
-      <h2>🎓 ¡Completaste los 120 niveles!</h2>
-      <p class="mission">De obsequio, aquí tienes tu certificado por completar Trivia Bíblica de principio a fin.</p>
+      <h2 data-i18n="certificate.title">🎓 ¡Completaste los 120 niveles!</h2>
+      <p class="mission" data-i18n="certificate.mission">...</p>
       <canvas id="certificate-canvas" width="1000" height="700"></canvas>
-      <button id="btn-download-certificate" class="btn btn-primary">Descargar certificado</button>
-      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+      <button id="btn-download-certificate" class="btn btn-primary" data-i18n="certificate.btnDownload">Descargar certificado</button>
+      <button class="btn btn-secondary btn-back-menu" data-i18n="howto.btnBack">Volver al menú</button>
     </div>
   </section>
 
 </main>
 
+<script src="js/i18n.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/teachings.js"></script>
 <script src="js/characters.js"></script>
+<script src="js/torah-talmud.js"></script>
 <script src="js/api.js"></script>
 <script src="js/game.js"></script>
 </body>

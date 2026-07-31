@@ -36,7 +36,9 @@ Con esto ya se puede jugar completo del nivel 1 al 20. Para desbloquear del 21 e
 - `js/teachings.js` — enseñanzas bíblicas por tema: qué hizo el personaje **en el pasado** y cómo aplicarlo **hoy y en el futuro**, con un reto de opción múltiple.
 - `js/characters.js` — Galería de Personajes Bíblicos: más de 200 figuras nombradas, de Génesis a Apocalipsis, agrupadas por época.
 - `js/api.js` — cliente del backend: registro/login, progreso de pago, checkout de Wompi.
-- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes, muro de pago y certificado.
+- `js/i18n.js` — sistema de idiomas: textos de la interfaz (`UI_STRINGS`) y funciones que resuelven qué banco de contenido usar según el idioma activo.
+- `js/torah-talmud.js` — modo bonus gratis: preguntas de la Torá (Levítico, Números, Deuteronomio) y leyendas del Talmud/Midrash, claramente diferenciadas.
+- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes, modo Torá/Talmud, muro de pago, certificado e idiomas.
 - `backend/` — servidor Node.js/Express + SQLite: cuentas, progreso server-side de los niveles pagos, e integración con Wompi (checkout y webhooks). Ver `backend/README.md`.
 
 ## Diseño de la dificultad (niveles 1 a 120)
@@ -112,3 +114,18 @@ La idea central del juego es esa: no memorizar datos sueltos sobre personajes de
 ## Datos históricos puntuales en cada pregunta
 
 Cada una de las 180 preguntas incluye, además de la respuesta, un **dato histórico concreto** que se muestra justo después de responder: un número exacto (edades, medidas, cantidades de años), un lugar geográfico preciso, o el detalle cronológico/narrativo inmediato del suceso (por ejemplo, cuántos codos medía el arca de Noé, cuántos días tomó reconstruir el muro de Jerusalén, o el nombre exacto del pozo donde Jesús habló con la samaritana). Esto responde a la idea de que el juego no se quede en la respuesta correcta, sino que ancle cada evento en algo puntual y verificable de la Biblia.
+
+## Torá y Leyendas del Talmud (modo bonus, gratis)
+
+Desde el menú, el botón **"📜 Torá y Leyendas del Talmud"** abre un espacio gratuito y separado de los 120 niveles de pago — no requiere cuenta ni suscripción. Cada ronda mezcla al azar 10 preguntas de dos fuentes muy distintas, siempre etiquetadas para que no se confundan:
+
+- **📖 Torá (texto bíblico)**: 20 preguntas que profundizan específicamente en Levítico, Números y Deuteronomio (fiestas, sacrificios, el Shemá, las hijas de Zelofehad, el monte Nebo, etc.), con referencia exacta de capítulo — igual de verificables que el resto del banco de preguntas del juego.
+- **✨ Leyenda del Talmud (tradición, no es la Biblia)**: 11 leyendas del Talmud y el Midrash (Hagadá) — como Abraham rompiendo los ídolos de su padre, el pastor Akiva y la piedra horadada por una gota de agua, o el debate del "horno de Ajnai" — cada una con su fuente exacta (tratado talmúdico) y marcada explícitamente como tradición oral judía posterior, **no** parte del texto de la Torá ni de la Biblia cristiana.
+
+## Idiomas
+
+El juego está disponible en **español** (idioma original) e **inglés**, con un selector en la esquina superior del menú. El idioma se detecta automáticamente del navegador la primera vez, y luego se recuerda en ese navegador.
+
+Todo el contenido está traducido en ambos idiomas: las 180 preguntas con su dato histórico, las 24 enseñanzas aplicadas, las más de 200 entradas de la Galería de Personajes, y las 31 preguntas del modo Torá y Talmud — además de toda la interfaz (menús, botones, pantallas de cuenta, muro de pago y certificado).
+
+La arquitectura (`js/i18n.js`) está pensada para agregar más idiomas fácilmente: cada archivo de contenido guarda su versión en español como `_ES` (canónica) y agrega variantes `_EN`, `_PT`, etc. con la misma estructura; si un idioma no tiene aún cierta traducción, el juego cae automáticamente al español en vez de romperse.
