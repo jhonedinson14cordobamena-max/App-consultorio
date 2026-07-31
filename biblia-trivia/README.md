@@ -108,3 +108,7 @@ Al superar cada nivel, el juego muestra una **enseñanza bíblica** con una estr
 3. **Reto de aplicación**: una situación de opción múltiple donde el jugador elige la mejor forma de vivir esa enseñanza, ganando 50 puntos de bonus por acertar.
 
 La idea central del juego es esa: no memorizar datos sueltos sobre personajes del pasado, sino traer sus historias al presente y practicar cómo aplicarlas hoy y en el futuro.
+
+## Datos históricos puntuales en cada pregunta
+
+Cada una de las 180 preguntas incluye, además de la respuesta, un **dato histórico concreto** que se muestra justo después de responder: un número exacto (edades, medidas, cantidades de años), un lugar geográfico preciso, o el detalle cronológico/narrativo inmediato del suceso (por ejemplo, cuántos codos medía el arca de Noé, cuántos días tomó reconstruir el muro de Jerusalén, o el nombre exacto del pozo donde Jesús habló con la samaritana). Esto responde a la idea de que el juego no se quede en la respuesta correcta, sino que ancle cada evento en algo puntual y verificable de la Biblia.

@@ -131,6 +131,7 @@ function pickQuestions(tier, count) {
     return {
       q: item.q,
       ref: item.ref,
+      detail: item.detail,
       options: shuffled.map((o) => o.text),
       correctIndex: shuffled.findIndex((o) => o.isCorrect),
     };
@@ -373,6 +374,9 @@ function showQuestion() {
   updateHud();
   const item = state.questions[state.qIndex];
   document.getElementById("question-text").textContent = item.q;
+  const factBox = document.getElementById("question-fact");
+  factBox.style.display = "none";
+  factBox.textContent = "";
   const optionsEl = document.getElementById("options");
   optionsEl.innerHTML = "";
   item.options.forEach((opt, idx) => {
@@ -429,10 +433,16 @@ function registerAnswer(idx, item) {
     state.lives--;
   }
 
+  if (item.detail) {
+    const factBox = document.getElementById("question-fact");
+    factBox.textContent = `📜 ${item.detail} (${item.ref})`;
+    factBox.style.display = "block";
+  }
+
   setTimeout(() => {
     state.qIndex++;
     showQuestion();
-  }, 900);
+  }, 1900);
 }
 
 function pickTeachingFor(tier) {
