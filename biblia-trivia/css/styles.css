@@ -123,6 +123,17 @@ body {
   font-weight: bold;
   cursor: pointer;
 }
+.btn-gold {
+  background: var(--gold);
+  color: #3a2604;
+  border: 2px solid #a6790f;
+}
+
+.account-bar {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: -8px 0 16px;
+}
 
 .howto-list {
   line-height: 1.6;
@@ -169,8 +180,34 @@ body {
   color: #6b6154;
   cursor: not-allowed;
 }
+.level-btn.locked-paid {
+  background: #5c3d1f;
+  color: #f2b134;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
 .level-btn:not(.locked):hover {
   transform: scale(1.08);
+}
+.level-btn.locked-paid:hover {
+  transform: scale(1.08);
+}
+
+.paywall-legend {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin: 0 0 10px;
+}
+.badge-locked,
+.badge-paid {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #b9b0a4;
+}
+.badge-paid {
+  background: #5c3d1f;
+  color: #f2b134;
 }
 
 .levels-footer {
@@ -320,6 +357,82 @@ body {
 }
 .teaching-feedback.fail {
   color: var(--danger);
+}
+
+/* Autenticación */
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid var(--ink);
+  background: transparent;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--ink);
+}
+.auth-tab.active {
+  background: var(--ink);
+  color: var(--parchment);
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+.auth-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #cbb98f;
+  font-family: inherit;
+  font-size: 1rem;
+}
+.auth-error {
+  color: var(--danger);
+  min-height: 1.2em;
+  font-weight: bold;
+  margin: 6px 0 12px;
+}
+
+/* Muro de pago */
+.paywall-price {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin: 0 0 16px;
+}
+.mystery-bonus {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(242, 177, 52, 0.25), rgba(155, 93, 229, 0.2));
+  border: 2px dashed var(--gold);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Certificado */
+.certificate-card {
+  text-align: center;
+}
+#certificate-canvas {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 10px;
+  margin: 12px 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Galería de personajes */

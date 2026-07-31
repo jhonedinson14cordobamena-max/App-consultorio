@@ -1,10 +1,22 @@
 # Trivia Bíblica — 120 Niveles
 
-Juego de preguntas y respuestas sobre la Biblia, 100% en el navegador (HTML, CSS y JavaScript puro, sin dependencias).
+Juego de preguntas y respuestas sobre la Biblia. El frontend es HTML, CSS y
+JavaScript puro (sin dependencias); desde el nivel 21 se apoya en un backend
+propio (`backend/`) para cuentas de usuario y pagos reales con Wompi.
 
 **Propósito del juego**: traer las historias del pasado bíblico al presente. No se trata solo de memorizar datos sobre los personajes, sino de ver qué hicieron en el pasado y cómo aplicar ese mismo ejemplo hoy y en el futuro.
 
-## Cómo jugarlo
+## Modelo de acceso
+
+- **Niveles 1 a 20: gratis**, sin necesidad de cuenta. Progreso guardado en el navegador.
+- **Niveles 21 a 100**: requieren crear una cuenta gratuita y pagar una suscripción única de **$38.000 COP**.
+- **Niveles 101 a 120**: requieren, además, un pago adicional de **$15.000 COP**.
+- Al completar el nivel 120 se obtiene, de obsequio, un **certificado de finalización** descargable con el nombre del jugador.
+- Los suscriptores participan además en la rifa de un bono por un **porcentaje que, por ahora, se mantiene como una incógnita** (ver nota legal más abajo).
+
+Los pagos se procesan con **Wompi** y el acceso pagado se verifica en un backend propio (no en el navegador) para que no se pueda "desbloquear" nada editando el almacenamiento local. Ver `backend/README.md` para la puesta en marcha, configuración de llaves y una checklist antes de cobrar dinero real.
+
+## Cómo jugarlo (solo niveles gratis 1-20)
 
 Abre `index.html` en cualquier navegador, o sirve la carpeta con un servidor estático:
 
@@ -14,14 +26,18 @@ python3 -m http.server 8080
 # luego abre http://localhost:8080
 ```
 
+Con esto ya se puede jugar completo del nivel 1 al 20. Para desbloquear del 21 en adelante hace falta además levantar el backend (`backend/`, ver su README) con las credenciales reales de Wompi.
+
 ## Estructura
 
-- `index.html` — pantallas del juego (menú, cómo jugar, galería de personajes, niveles, juego, resultado).
+- `index.html` — pantallas del juego (menú, cómo jugar, galería de personajes, niveles, juego, resultado, cuenta, muro de pago, certificado).
 - `css/styles.css` — estilos.
 - `js/questions.js` — banco de preguntas (180 en total, 15 por tema), agrupado en 12 temas ("tiers") bíblicos, con personajes de todo el Antiguo y Nuevo Testamento.
 - `js/teachings.js` — enseñanzas bíblicas por tema: qué hizo el personaje **en el pasado** y cómo aplicarlo **hoy y en el futuro**, con un reto de opción múltiple.
 - `js/characters.js` — Galería de Personajes Bíblicos: más de 200 figuras nombradas, de Génesis a Apocalipsis, agrupadas por época.
-- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes y guardado del progreso (`localStorage`).
+- `js/api.js` — cliente del backend: registro/login, progreso de pago, checkout de Wompi.
+- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes, muro de pago y certificado.
+- `backend/` — servidor Node.js/Express + SQLite: cuentas, progreso server-side de los niveles pagos, e integración con Wompi (checkout y webhooks). Ver `backend/README.md`.
 
 ## Diseño de la dificultad (niveles 1 a 120)
 
@@ -48,7 +64,23 @@ Dentro de cada tema, la dificultad sube nivel a nivel mediante:
 - **Vidas disponibles**: 4 en los niveles iniciales, 3 a partir del 61, 2 a partir del 101.
 - **Multiplicador de puntaje**: crece con el nivel, premiando además la velocidad de respuesta.
 
-El progreso (nivel desbloqueado y puntaje total) se guarda automáticamente en el navegador.
+El progreso de los niveles 1-20 se guarda automáticamente en el navegador; del nivel 21 en adelante se guarda en el backend, asociado a la cuenta del jugador.
+
+## Certificado y bono sorpresa
+
+Al completar el nivel 120 (con la suscripción hasta el 120 activa), el menú
+muestra un botón **"🎓 Mi certificado"** que genera —en el propio navegador,
+con un `<canvas>`— un certificado personalizado con el nombre del jugador y
+la fecha, descargable como imagen PNG.
+
+Además, el juego anuncia una promoción: los suscriptores participan en la
+rifa de un bono por **un porcentaje que se mantiene como una incógnita**.
+Esto está implementado **únicamente como texto de marketing** en la
+interfaz, sin ningún mecanismo de sorteo real dentro del código. Se decidió
+así a propósito: las rifas o sorteos ligados a un pago suelen estar
+regulados como juegos de suerte y azar (en Colombia, por Coljuegos). Antes
+de anunciar o entregar un premio real, se recomienda confirmar con un
+asesor legal si se necesita autorización.
 
 ## Galería de Personajes Bíblicos
 

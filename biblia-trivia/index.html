@@ -16,9 +16,16 @@
       <h1>📖 Trivia Bíblica</h1>
       <p class="subtitle">120 niveles de dificultad — de aprendiz a experto</p>
       <p class="mission">Este juego nació para traer las historias del pasado bíblico al presente: conocer a sus personajes no es solo un dato, sino una oportunidad de aplicar hoy —y en el futuro— lo que ellos vivieron.</p>
+      <p id="account-bar" class="account-bar"></p>
+      <div class="mystery-bonus">
+        🎁 <strong>Promoción:</strong> los suscriptores participan en la rifa de un bono por
+        <strong>un porcentaje que, por ahora, es una incógnita</strong>. ¡Pronto revelaremos de cuánto se trata!
+      </div>
       <button id="btn-play" class="btn btn-primary">Jugar</button>
       <button id="btn-characters" class="btn btn-secondary">Personajes de la Biblia</button>
+      <button id="btn-certificate" class="btn btn-gold" style="display:none">🎓 Mi certificado</button>
       <button id="btn-how-to-play" class="btn btn-secondary">Cómo jugar</button>
+      <button id="btn-logout" class="btn btn-tertiary" style="display:none">Cerrar sesión</button>
     </div>
   </section>
 
@@ -57,10 +64,12 @@
       <div class="levels-header">
         <h2>Selecciona un nivel</h2>
         <div class="stats">
-          <span>Progreso: <strong id="progress-text">0 / 120</strong></span>
+          <span>Nivel gratis: <strong id="progress-text">0 / 20</strong></span>
+          <span id="paid-progress-text" style="display:none">Nivel de pago: <strong id="paid-progress-value">21 / 120</strong></span>
           <span>Puntos totales: <strong id="total-score">0</strong></span>
         </div>
       </div>
+      <p class="paywall-legend"><span class="badge-locked">🔒</span> por jugar &nbsp; <span class="badge-paid">🔒💳</span> requiere suscripción de pago</p>
       <div id="level-grid" class="level-grid"></div>
       <div class="levels-footer">
         <button class="btn btn-secondary btn-back-menu">Menú</button>
@@ -118,11 +127,70 @@
     </div>
   </section>
 
+  <!-- Autenticación -->
+  <section id="screen-auth" class="screen">
+    <div class="card">
+      <h2>Los niveles 1-20 son gratis</h2>
+      <p class="mission">Para continuar del nivel 21 en adelante necesitas una cuenta gratuita y, luego, una suscripción de pago. Crea tu cuenta o inicia sesión para seguir.</p>
+
+      <div class="auth-tabs">
+        <button id="auth-tab-login" class="auth-tab active">Iniciar sesión</button>
+        <button id="auth-tab-register" class="auth-tab">Crear cuenta</button>
+      </div>
+
+      <form id="form-login" class="auth-form">
+        <label>Correo<input type="email" id="login-email" required autocomplete="email" /></label>
+        <label>Contraseña<input type="password" id="login-password" required autocomplete="current-password" /></label>
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+      </form>
+
+      <form id="form-register" class="auth-form" style="display:none">
+        <label>Nombre<input type="text" id="register-name" required autocomplete="name" /></label>
+        <label>Correo<input type="email" id="register-email" required autocomplete="email" /></label>
+        <label>Contraseña (mínimo 8 caracteres)<input type="password" id="register-password" required minlength="8" autocomplete="new-password" /></label>
+        <button type="submit" class="btn btn-primary">Crear cuenta</button>
+      </form>
+
+      <p id="auth-error" class="auth-error"></p>
+      <button class="btn btn-tertiary btn-back-levels-from-auth">Cancelar</button>
+    </div>
+  </section>
+
+  <!-- Muro de pago -->
+  <section id="screen-paywall" class="screen">
+    <div class="card">
+      <h2 id="paywall-title">Continúa tu progreso</h2>
+      <p id="paywall-detail" class="mission"></p>
+      <p class="paywall-price"><strong id="paywall-price">$0</strong> COP</p>
+      <button id="btn-pay-wompi" class="btn btn-primary">Pagar con Wompi</button>
+      <p id="paywall-status" class="auth-error"></p>
+
+      <div class="mystery-bonus">
+        🎁 <strong>Bono sorpresa:</strong> al suscribirte participas en la rifa de un bono por
+        <strong>un porcentaje que por ahora es una incógnita</strong> — ¡se revelará más adelante!
+      </div>
+
+      <button class="btn btn-tertiary btn-back-levels-from-auth">Cancelar</button>
+    </div>
+  </section>
+
+  <!-- Certificado -->
+  <section id="screen-certificate" class="screen">
+    <div class="card certificate-card">
+      <h2>🎓 ¡Completaste los 120 niveles!</h2>
+      <p class="mission">De obsequio, aquí tienes tu certificado por completar Trivia Bíblica de principio a fin.</p>
+      <canvas id="certificate-canvas" width="1000" height="700"></canvas>
+      <button id="btn-download-certificate" class="btn btn-primary">Descargar certificado</button>
+      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+    </div>
+  </section>
+
 </main>
 
 <script src="js/questions.js"></script>
 <script src="js/teachings.js"></script>
 <script src="js/characters.js"></script>
+<script src="js/api.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>
