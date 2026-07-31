@@ -720,32 +720,37 @@ function getExperienceById(id) {
 function renderExperienceList() {
   const list = document.getElementById("experience-list");
   list.innerHTML = "";
+
+  const byEra = new Map();
   getExperiences().forEach((exp) => {
-    const card = document.createElement("div");
-    card.className = "character-group";
+    if (!byEra.has(exp.era)) byEra.set(exp.era, []);
+    byEra.get(exp.era).push(exp);
+  });
+
+  const eraOrder = getCharacterGallery().map((group) => group.era);
+
+  eraOrder.forEach((era) => {
+    const items = byEra.get(era);
+    if (!items || !items.length) return;
+
+    const section = document.createElement("div");
+    section.className = "character-group";
 
     const heading = document.createElement("h3");
-    heading.textContent = `${exp.character} — ${exp.title}`;
-    card.appendChild(heading);
+    heading.textContent = era;
+    section.appendChild(heading);
 
-    const refEl = document.createElement("p");
-    refEl.className = "character-ref";
-    refEl.textContent = exp.ref;
-    card.appendChild(refEl);
+    items.forEach((exp) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "experience-row";
+      row.style.setProperty("--tier-color", exp.tierColor);
+      row.innerHTML = `<span class="experience-row-name">${exp.character} — ${exp.title}</span><span class="experience-row-ref">${exp.ref}</span>`;
+      row.addEventListener("click", () => startExperience(exp.id));
+      section.appendChild(row);
+    });
 
-    const introP = document.createElement("p");
-    introP.className = "character-row";
-    introP.textContent = exp.intro;
-    card.appendChild(introP);
-
-    const btn = document.createElement("button");
-    btn.className = "btn btn-primary";
-    btn.style.marginTop = "10px";
-    btn.textContent = t("experience.btnBeginStory");
-    btn.addEventListener("click", () => startExperience(exp.id));
-    card.appendChild(btn);
-
-    list.appendChild(card);
+    list.appendChild(section);
   });
 }
 

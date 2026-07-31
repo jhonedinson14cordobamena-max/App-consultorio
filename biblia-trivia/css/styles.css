@@ -500,6 +500,37 @@ body {
   line-height: 1.4;
 }
 
+.experience-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  margin: 4px 0;
+  padding: 8px 10px;
+  border: none;
+  border-left: 4px solid var(--tier-color, #845ec2);
+  border-radius: 6px;
+  background: #f7f1e3;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.experience-row:hover {
+  background: #efe4c4;
+}
+.experience-row-name {
+  font-weight: 600;
+}
+.experience-row-ref {
+  font-size: 0.78rem;
+  font-style: italic;
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
 @media (min-width: 480px) {
   .result-actions {
     flex-direction: row;
