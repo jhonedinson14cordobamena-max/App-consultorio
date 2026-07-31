@@ -110,6 +110,10 @@ function getTalmudLegends() {
   return pickContent(TALMUD_LEGENDS_ES, typeof TALMUD_LEGENDS_EN !== "undefined" ? TALMUD_LEGENDS_EN : null);
 }
 
+function getExperiences() {
+  return pickContent(EXPERIENCES_ES, typeof EXPERIENCES_EN !== "undefined" ? EXPERIENCES_EN : null);
+}
+
 /* ---------- Textos de la interfaz ---------- */
 
 const UI_STRINGS = {
@@ -221,6 +225,19 @@ const UI_STRINGS = {
     "torah.resultTitle": "Ronda completada",
     "torah.resultDetail": "Acertaste {correct} de {total} preguntas sobre la Torá y las leyendas del Talmud.",
     "torah.btnPlayAgain": "Jugar otra ronda",
+
+    "menu.btnExperience": "🎭 Vive la Historia",
+    "experience.listTitle": "Vive la Historia",
+    "experience.listIntro": "Elige un personaje y vive su historia en primera persona, tomando decisiones en los momentos clave del relato. Los hechos siguen siendo fieles a la Biblia — lo que cambia es cómo los vives.",
+    "experience.btnBack": "Volver al menú",
+    "experience.btnBeginStory": "Comenzar esta historia",
+    "experience.exitConfirm": "¿Salir de esta historia? Perderás el progreso de esta ronda.",
+    "experience.endingTitle": "Lo que ocurrió",
+    "experience.reflectionTitle": "💡 Del pasado a tu presente",
+    "experience.btnReplay": "Vivir otra historia",
+    "experience.btnMenu": "Volver al menú",
+    "experience.sceneProgress": "Escena {n} de {total}",
+    "experience.btnContinue": "Continuar",
   },
 
   en: {
@@ -331,5 +348,18 @@ const UI_STRINGS = {
     "torah.resultTitle": "Round complete",
     "torah.resultDetail": "You got {correct} of {total} questions right about the Torah and the Talmud legends.",
     "torah.btnPlayAgain": "Play another round",
+
+    "menu.btnExperience": "🎭 Live the Story",
+    "experience.listTitle": "Live the Story",
+    "experience.listIntro": "Choose a character and live their story firsthand, making decisions at key moments in the account. The events stay true to the Bible — what changes is how you experience them.",
+    "experience.btnBack": "Back to menu",
+    "experience.btnBeginStory": "Begin this story",
+    "experience.exitConfirm": "Leave this story? You'll lose this round's progress.",
+    "experience.endingTitle": "What happened",
+    "experience.reflectionTitle": "💡 From the past to your present",
+    "experience.btnReplay": "Live another story",
+    "experience.btnMenu": "Back to menu",
+    "experience.sceneProgress": "Scene {n} of {total}",
+    "experience.btnContinue": "Continue",
   },
 };

@@ -38,7 +38,8 @@ Con esto ya se puede jugar completo del nivel 1 al 20. Para desbloquear del 21 e
 - `js/api.js` — cliente del backend: registro/login, progreso de pago, checkout de Wompi.
 - `js/i18n.js` — sistema de idiomas: textos de la interfaz (`UI_STRINGS`) y funciones que resuelven qué banco de contenido usar según el idioma activo.
 - `js/torah-talmud.js` — modo bonus gratis: preguntas de la Torá (Levítico, Números, Deuteronomio) y leyendas del Talmud/Midrash, claramente diferenciadas.
-- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes, modo Torá/Talmud, muro de pago, certificado e idiomas.
+- `js/experiences.js` — modo bonus gratis "Vive la Historia": 8 relatos bíblicos interactivos en segunda persona, con decisiones en momentos clave.
+- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes, modo Torá/Talmud, Vive la Historia, muro de pago, certificado e idiomas.
 - `backend/` — servidor Node.js/Express + SQLite: cuentas, progreso server-side de los niveles pagos, e integración con Wompi (checkout y webhooks). Ver `backend/README.md`.
 
 ## Diseño de la dificultad (niveles 1 a 120)
@@ -115,6 +116,14 @@ La idea central del juego es esa: no memorizar datos sueltos sobre personajes de
 
 Cada una de las 180 preguntas incluye, además de la respuesta, un **dato histórico concreto** que se muestra justo después de responder: un número exacto (edades, medidas, cantidades de años), un lugar geográfico preciso, o el detalle cronológico/narrativo inmediato del suceso (por ejemplo, cuántos codos medía el arca de Noé, cuántos días tomó reconstruir el muro de Jerusalén, o el nombre exacto del pozo donde Jesús habló con la samaritana). Esto responde a la idea de que el juego no se quede en la respuesta correcta, sino que ancle cada evento en algo puntual y verificable de la Biblia.
 
+## Vive la Historia (modo bonus, gratis)
+
+Desde el menú, el botón **"🎭 Vive la Historia"** abre un modo distinto a la trivia: en vez de responder preguntas *sobre* un personaje, el jugador vive su historia en segunda persona ("Eres Noé...", "Eres Ester..."), tomando decisiones en los momentos clave del relato.
+
+Incluye 8 relatos: Noé y el diluvio, Abraham y la prueba de Isaac, Moisés y el Mar Rojo, David y Goliat, Daniel en el foso de los leones, Jonás y el gran pez, Ester y la valentía, y Pedro (la negación y la restauración). Cada uno tiene una introducción, 3 escenas con dos decisiones posibles cada una (con su propia reacción/reflexión), un desenlace fiel al relato bíblico, y una reflexión final que conecta la historia con la vida de hoy.
+
+**Nota de diseño honesta**: los relatos bíblicos ya ocurrieron y el juego no reescribe la Escritura según lo que el jugador elija — ambas opciones en cada decisión llevan al mismo desenlace histórico. Lo que cambia con la elección es *cómo* se vive emocionalmente ese momento (con confianza inmediata o con duda humana antes de obedecer, por ejemplo), no el resultado bíblico.
+
 ## Torá y Leyendas del Talmud (modo bonus, gratis)
 
 Desde el menú, el botón **"📜 Torá y Leyendas del Talmud"** abre un espacio gratuito y separado de los 120 niveles de pago — no requiere cuenta ni suscripción. Cada ronda mezcla al azar 10 preguntas de dos fuentes muy distintas, siempre etiquetadas para que no se confundan:
@@ -126,6 +135,6 @@ Desde el menú, el botón **"📜 Torá y Leyendas del Talmud"** abre un espacio
 
 El juego está disponible en **español** (idioma original) e **inglés**, con un selector en la esquina superior del menú. El idioma se detecta automáticamente del navegador la primera vez, y luego se recuerda en ese navegador.
 
-Todo el contenido está traducido en ambos idiomas: las 180 preguntas con su dato histórico, las 24 enseñanzas aplicadas, las más de 200 entradas de la Galería de Personajes, y las 31 preguntas del modo Torá y Talmud — además de toda la interfaz (menús, botones, pantallas de cuenta, muro de pago y certificado).
+Todo el contenido está traducido en ambos idiomas: las 180 preguntas con su dato histórico, las 24 enseñanzas aplicadas, las más de 200 entradas de la Galería de Personajes, las 31 preguntas del modo Torá y Talmud, y los 8 relatos interactivos de Vive la Historia — además de toda la interfaz (menús, botones, pantallas de cuenta, muro de pago y certificado).
 
 La arquitectura (`js/i18n.js`) está pensada para agregar más idiomas fácilmente: cada archivo de contenido guarda su versión en español como `_ES` (canónica) y agrega variantes `_EN`, `_PT`, etc. con la misma estructura; si un idioma no tiene aún cierta traducción, el juego cae automáticamente al español en vez de romperse.

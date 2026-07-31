@@ -44,6 +44,7 @@ const state = {
   pendingTier: null,
   prices: { tier100Cop: 38000, tier120Cop: 15000 },
   torah: null, // estado de la ronda del modo Torá y Talmud
+  experience: null, // { id, index } del modo Vive la Historia
 };
 
 /* ---------- Persistencia local (solo niveles 1-20, gratis) ---------- */
@@ -188,6 +189,9 @@ function onLanguageChanged() {
   if (activeScreen === "screen-levels") renderLevelGrid();
   if (activeScreen === "screen-characters") renderCharacterGallery();
   if (activeScreen === "screen-certificate") renderCertificate();
+  if (activeScreen === "screen-experience-list") renderExperienceList();
+  if (activeScreen === "screen-experience-play" && state.experience) showExperienceStep();
+  if (activeScreen === "screen-experience-end" && state.experience) endExperience();
 }
 
 /* ---------- Barra de cuenta (menú) ---------- */
@@ -707,6 +711,115 @@ function endTorahRound() {
   showScreen("screen-torah-result");
 }
 
+/* ---------- Vive la Historia (modo bonus, gratis) ---------- */
+
+function getExperienceById(id) {
+  return getExperiences().find((e) => e.id === id);
+}
+
+function renderExperienceList() {
+  const list = document.getElementById("experience-list");
+  list.innerHTML = "";
+  getExperiences().forEach((exp) => {
+    const card = document.createElement("div");
+    card.className = "character-group";
+
+    const heading = document.createElement("h3");
+    heading.textContent = `${exp.character} — ${exp.title}`;
+    card.appendChild(heading);
+
+    const refEl = document.createElement("p");
+    refEl.className = "character-ref";
+    refEl.textContent = exp.ref;
+    card.appendChild(refEl);
+
+    const introP = document.createElement("p");
+    introP.className = "character-row";
+    introP.textContent = exp.intro;
+    card.appendChild(introP);
+
+    const btn = document.createElement("button");
+    btn.className = "btn btn-primary";
+    btn.style.marginTop = "10px";
+    btn.textContent = t("experience.btnBeginStory");
+    btn.addEventListener("click", () => startExperience(exp.id));
+    card.appendChild(btn);
+
+    list.appendChild(card);
+  });
+}
+
+function startExperience(id) {
+  state.experience = { id, index: -1 };
+  showScreen("screen-experience-play");
+  showExperienceStep();
+}
+
+function showExperienceStep() {
+  const def = getExperienceById(state.experience.id);
+  const index = state.experience.index;
+
+  document.getElementById("experience-character-label").textContent = `${def.character} — ${def.title}`;
+  document.getElementById("experience-feedback").style.display = "none";
+  document.getElementById("btn-experience-continue").style.display = "none";
+
+  if (index === -1) {
+    document.getElementById("experience-progress-label").textContent = def.ref;
+    document.getElementById("experience-scene-text").textContent = def.intro;
+    document.getElementById("experience-choices").innerHTML = "";
+    const btn = document.getElementById("btn-experience-continue");
+    btn.style.display = "inline-block";
+    btn.onclick = () => {
+      state.experience.index = 0;
+      showExperienceStep();
+    };
+    return;
+  }
+
+  if (index >= def.scenes.length) {
+    return endExperience();
+  }
+
+  const scene = def.scenes[index];
+  document.getElementById("experience-progress-label").textContent = t("experience.sceneProgress", {
+    n: index + 1,
+    total: def.scenes.length,
+  });
+  document.getElementById("experience-scene-text").textContent = scene.text;
+
+  const choicesEl = document.getElementById("experience-choices");
+  choicesEl.innerHTML = "";
+  scene.choices.forEach((choice) => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = choice.label;
+    b.addEventListener("click", () => chooseExperienceOption(choice));
+    choicesEl.appendChild(b);
+  });
+}
+
+function chooseExperienceOption(choice) {
+  document.querySelectorAll("#experience-choices .option-btn").forEach((b) => (b.disabled = true));
+  const feedback = document.getElementById("experience-feedback");
+  feedback.textContent = choice.feedback;
+  feedback.style.display = "block";
+
+  const btn = document.getElementById("btn-experience-continue");
+  btn.style.display = "inline-block";
+  btn.onclick = () => {
+    state.experience.index++;
+    showExperienceStep();
+  };
+}
+
+function endExperience() {
+  const def = getExperienceById(state.experience.id);
+  document.getElementById("experience-end-title").textContent = `${def.character} — ${def.title}`;
+  document.getElementById("experience-end-text").textContent = def.ending;
+  document.getElementById("experience-reflection-text").textContent = def.reflection;
+  showScreen("screen-experience-end");
+}
+
 /* ---------- Certificado ---------- */
 
 function renderCertificate() {
@@ -808,6 +921,24 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("btn-torah-start").addEventListener("click", startTorahRound);
   document.getElementById("btn-torah-again").addEventListener("click", startTorahRound);
   document.getElementById("btn-torah-exit").addEventListener("click", () => showScreen("screen-torah-intro"));
+
+  document.getElementById("btn-experience").addEventListener("click", () => {
+    renderExperienceList();
+    showScreen("screen-experience-list");
+  });
+
+  document.getElementById("btn-experience-exit").addEventListener("click", () => {
+    if (confirm(t("experience.exitConfirm"))) {
+      state.experience = null;
+      renderExperienceList();
+      showScreen("screen-experience-list");
+    }
+  });
+
+  document.getElementById("btn-experience-replay").addEventListener("click", () => {
+    renderExperienceList();
+    showScreen("screen-experience-list");
+  });
 
   document.getElementById("btn-certificate").addEventListener("click", () => {
     renderCertificate();

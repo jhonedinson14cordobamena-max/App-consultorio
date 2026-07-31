@@ -25,6 +25,7 @@
       <button id="btn-play" class="btn btn-primary" data-i18n="menu.btnPlay">Jugar</button>
       <button id="btn-characters" class="btn btn-secondary" data-i18n="menu.btnCharacters">Personajes de la Biblia</button>
       <button id="btn-torah" class="btn btn-secondary" data-i18n="menu.btnTorah">📜 Torá y Leyendas del Talmud</button>
+      <button id="btn-experience" class="btn btn-secondary" data-i18n="menu.btnExperience">🎭 Vive la Historia</button>
       <button id="btn-certificate" class="btn btn-gold" style="display:none" data-i18n="menu.btnCertificate">🎓 Mi certificado</button>
       <button id="btn-how-to-play" class="btn btn-secondary" data-i18n="menu.btnHowTo">Cómo jugar</button>
       <button id="btn-logout" class="btn btn-tertiary" style="display:none" data-i18n="menu.btnLogout">Cerrar sesión</button>
@@ -95,6 +96,50 @@
       <div class="result-actions">
         <button id="btn-torah-again" class="btn btn-primary" data-i18n="torah.btnPlayAgain">Jugar otra ronda</button>
         <button class="btn btn-tertiary btn-back-menu" data-i18n="torah.btnBack">Volver al menú</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vive la Historia: lista de personajes -->
+  <section id="screen-experience-list" class="screen">
+    <div class="card">
+      <h2 data-i18n="experience.listTitle">Vive la Historia</h2>
+      <p class="mission" data-i18n="experience.listIntro">...</p>
+      <div id="experience-list" class="characters-list"></div>
+      <button class="btn btn-secondary btn-back-menu" data-i18n="experience.btnBack">Volver al menú</button>
+    </div>
+  </section>
+
+  <!-- Vive la Historia: relato interactivo -->
+  <section id="screen-experience-play" class="screen">
+    <div class="card game-card">
+      <div class="game-header">
+        <div>
+          <span id="experience-character-label" class="level-label">Personaje</span>
+          <span id="experience-progress-label" class="tier-label">Escena 1 de 3</span>
+        </div>
+        <button id="btn-experience-exit" class="btn btn-tiny">✕</button>
+      </div>
+      <h3 id="experience-scene-text" class="question-text">...</h3>
+      <div id="experience-choices" class="options"></div>
+      <p id="experience-feedback" class="question-fact"></p>
+      <button id="btn-experience-continue" class="btn btn-primary" style="display:none" data-i18n="experience.btnContinue">Continuar</button>
+    </div>
+  </section>
+
+  <!-- Vive la Historia: desenlace -->
+  <section id="screen-experience-end" class="screen">
+    <div class="card result-card">
+      <h2 id="experience-end-title">Título</h2>
+      <h3 data-i18n="experience.endingTitle">Lo que ocurrió</h3>
+      <p id="experience-end-text"></p>
+      <div class="teaching-box" style="display:block">
+        <h3 data-i18n="experience.reflectionTitle">💡 Del pasado a tu presente</h3>
+        <p id="experience-reflection-text" class="teaching-application"></p>
+      </div>
+      <div class="result-actions">
+        <button id="btn-experience-replay" class="btn btn-primary" data-i18n="experience.btnReplay">Vivir otra historia</button>
+        <button class="btn btn-tertiary btn-back-menu" data-i18n="experience.btnMenu">Volver al menú</button>
       </div>
     </div>
   </section>
@@ -231,6 +276,7 @@
 <script src="js/teachings.js"></script>
 <script src="js/characters.js"></script>
 <script src="js/torah-talmud.js"></script>
+<script src="js/experiences.js"></script>
 <script src="js/api.js"></script>
 <script src="js/game.js"></script>
 </body>
