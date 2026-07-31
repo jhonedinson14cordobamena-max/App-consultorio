@@ -212,6 +212,7 @@ function registerAnswer(idx, item) {
 function endLevel() {
   clearInterval(state.timer);
   const passed = state.correctCount >= state.config.passCount && state.lives > 0;
+  state.teaching = null;
 
   if (passed) {
     state.totalScore += state.score;
@@ -220,6 +221,8 @@ function endLevel() {
     } else if (state.currentLevel >= state.unlockedLevel) {
       state.unlockedLevel = Math.min(TOTAL_LEVELS, state.currentLevel + 1);
     }
+    const pool = TEACHINGS[state.config.tier] || [];
+    if (pool.length) state.teaching = pool[Math.floor(Math.random() * pool.length)];
     saveProgress();
   }
 
@@ -235,7 +238,61 @@ function endLevel() {
     document.getElementById("result-detail").textContent += " ¡Has completado los 120 niveles!";
   }
 
+  renderTeaching(passed);
   showScreen("screen-result");
+}
+
+/* ---------- Enseñanza y aplicación práctica ---------- */
+
+function renderTeaching(passed) {
+  const box = document.getElementById("teaching-box");
+  if (!passed || !state.teaching) {
+    box.style.display = "none";
+    return;
+  }
+  box.style.display = "block";
+  document.getElementById("teaching-lesson").textContent = state.teaching.lesson;
+  document.getElementById("teaching-application").textContent = "💡 Aplícalo: " + state.teaching.application;
+  document.getElementById("teaching-challenge-q").textContent = state.teaching.challenge.q;
+  document.getElementById("teaching-feedback").textContent = "";
+  document.getElementById("teaching-feedback").className = "teaching-feedback";
+
+  const optsEl = document.getElementById("teaching-options");
+  optsEl.innerHTML = "";
+  const shuffledOptions = shuffle(
+    state.teaching.challenge.options.map((text, idx) => ({
+      text,
+      isCorrect: idx === state.teaching.challenge.correct,
+    }))
+  );
+  shuffledOptions.forEach((opt) => {
+    const b = document.createElement("button");
+    b.className = "option-btn";
+    b.textContent = opt.text;
+    b.addEventListener("click", () => answerTeachingChallenge(b, opt.isCorrect, shuffledOptions, optsEl));
+    optsEl.appendChild(b);
+  });
+}
+
+function answerTeachingChallenge(clickedBtn, isCorrect, shuffledOptions, optsEl) {
+  const buttons = optsEl.querySelectorAll(".option-btn");
+  buttons.forEach((b, i) => {
+    b.disabled = true;
+    if (shuffledOptions[i].isCorrect) b.classList.add("correct");
+  });
+  if (!isCorrect) clickedBtn.classList.add("wrong");
+
+  const feedback = document.getElementById("teaching-feedback");
+  if (isCorrect) {
+    const bonus = 50;
+    state.totalScore += bonus;
+    saveProgress();
+    feedback.textContent = `¡Correcto! +${bonus} puntos de bonus por aplicar la enseñanza.`;
+    feedback.className = "teaching-feedback pass";
+  } else {
+    feedback.textContent = "Esa no es la mejor aplicación. ¡Sigue practicando esta enseñanza en tu vida diaria!";
+    feedback.className = "teaching-feedback fail";
+  }
 }
 
 /* ---------- Eventos globales ---------- */

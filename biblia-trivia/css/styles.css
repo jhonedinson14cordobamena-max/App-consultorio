@@ -272,6 +272,43 @@ body {
   margin-top: 16px;
 }
 
+/* Enseñanza y aplicación práctica */
+.teaching-box {
+  display: none;
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #fffaf0;
+  border: 2px dashed var(--gold);
+  text-align: left;
+}
+.teaching-box h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.teaching-lesson {
+  font-style: italic;
+  margin-bottom: 8px;
+}
+.teaching-application {
+  font-weight: bold;
+  margin-bottom: 14px;
+}
+.challenge-prompt {
+  margin-bottom: 10px;
+}
+.teaching-feedback {
+  margin-top: 10px;
+  font-weight: bold;
+  min-height: 1.2em;
+}
+.teaching-feedback.pass {
+  color: var(--success);
+}
+.teaching-feedback.fail {
+  color: var(--danger);
+}
+
 @media (min-width: 480px) {
   .result-actions {
     flex-direction: row;

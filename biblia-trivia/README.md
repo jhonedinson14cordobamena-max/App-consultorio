@@ -16,8 +16,9 @@ python3 -m http.server 8080
 
 - `index.html` — pantallas del juego (menú, cómo jugar, niveles, juego, resultado).
 - `css/styles.css` — estilos.
-- `js/questions.js` — banco de preguntas, agrupado en 12 temas ("tiers") bíblicos.
-- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje y guardado del progreso (`localStorage`).
+- `js/questions.js` — banco de preguntas (180 en total, 15 por tema), agrupado en 12 temas ("tiers") bíblicos, con personajes de todo el Antiguo y Nuevo Testamento.
+- `js/teachings.js` — enseñanzas bíblicas por tema y retos de aplicación práctica a la vida diaria.
+- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada y guardado del progreso (`localStorage`).
 
 ## Diseño de la dificultad (niveles 1 a 120)
 
@@ -45,3 +46,14 @@ Dentro de cada tema, la dificultad sube nivel a nivel mediante:
 - **Multiplicador de puntaje**: crece con el nivel, premiando además la velocidad de respuesta.
 
 El progreso (nivel desbloqueado y puntaje total) se guarda automáticamente en el navegador.
+
+## Personajes bíblicos incluidos
+
+Las preguntas cubren personajes de toda la Biblia, entre ellos:
+
+- **Antiguo Testamento**: Adán, Eva, Caín, Abel, Set, Enoc, Noé, Abraham, Sara, Agar, Isaac, Jacob, Esaú, Labán, José, Moisés, Miriam, Aarón, Josué, Caleb, Balaam, Débora, Sansón, Rut, Noemí, Booz, Ana, Samuel, Saúl, David, Jonatán, Abigail, Betsabé, Salomón, Elías, Eliseo, Naamán, Job, Isaías, Jeremías, Ezequiel, Daniel, Sadrac/Mesac/Abed-nego, Jonás, Ester, Mardoqueo, Nehemías, Esdras, Melquisedec, entre otros.
+- **Nuevo Testamento**: María, José, Zacarías y Elisabet, Juan el Bautista, Jesús, Pedro, Andrés, Juan, Tomás, Mateo, Judas Iscariote, Matías, Zaqueo, Nicodemo, la mujer samaritana, Marta y María de Betania, Lázaro, Esteban, Saulo/Pablo, Bernabé, Cornelio, Ananías y Safira, Priscila y Aquila, Lidia, Apolos, Timoteo, Tito, Onésimo, Silas, entre otros.
+
+## Enseñanza aplicada
+
+Al superar cada nivel, el juego muestra una **enseñanza bíblica** relacionada con el tema del nivel, una **sugerencia de aplicación práctica** a la vida diaria, y un pequeño **reto de opción múltiple** ("¿cómo la aplicarías en esta situación?"). Responder correctamente el reto otorga 50 puntos de bonus, reforzando que el juego no es solo memorizar datos, sino llevar las enseñanzas a la práctica.
