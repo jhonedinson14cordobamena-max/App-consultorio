@@ -15,7 +15,9 @@
     <div class="card menu-card">
       <h1>📖 Trivia Bíblica</h1>
       <p class="subtitle">120 niveles de dificultad — de aprendiz a experto</p>
+      <p class="mission">Este juego nació para traer las historias del pasado bíblico al presente: conocer a sus personajes no es solo un dato, sino una oportunidad de aplicar hoy —y en el futuro— lo que ellos vivieron.</p>
       <button id="btn-play" class="btn btn-primary">Jugar</button>
+      <button id="btn-characters" class="btn btn-secondary">Personajes de la Biblia</button>
       <button id="btn-how-to-play" class="btn btn-secondary">Cómo jugar</button>
     </div>
   </section>
@@ -24,14 +26,27 @@
   <section id="screen-howto" class="screen">
     <div class="card">
       <h2>Cómo jugar</h2>
+      <p class="mission">Este juego se creó con un propósito: traer lo que ocurrió en el pasado bíblico al presente, para que puedas aplicarlo hoy y en tu futuro, no solo memorizarlo.</p>
       <ul class="howto-list">
-        <li>Hay <strong>120 niveles</strong>, agrupados en 12 temas bíblicos (Génesis, Patriarcas, Éxodo, Reyes, Profetas, Jesús, Parábolas, Apóstoles, Cartas, Apocalipsis, y más).</li>
+        <li>Hay <strong>120 niveles</strong>, agrupados en 12 temas bíblicos (Génesis, Patriarcas, Éxodo, Reyes, Profetas, Jesús, Parábolas, Apóstoles, Cartas, Apocalipsis, y más), con personajes de toda la Biblia.</li>
         <li>Cada nivel es una ronda corta de preguntas de opción múltiple.</li>
         <li>A medida que subes de nivel, tienes <strong>menos tiempo</strong> por pregunta, <strong>menos vidas</strong> y necesitas <strong>más aciertos</strong> para pasar.</li>
         <li>Responder rápido y correctamente da más puntos.</li>
+        <li>Al superar un nivel verás una <strong>enseñanza</strong>: qué hizo un personaje en el pasado, y cómo aplicar ese mismo ejemplo hoy y en el futuro, con un reto extra que da puntos de bonus.</li>
+        <li>Explora la <strong>Galería de Personajes</strong> desde el menú para conocer a más de 150 figuras de toda la Biblia, de Génesis a Apocalipsis.</li>
         <li>Si te quedas sin vidas o no llegas a los aciertos requeridos, puedes reintentar el nivel.</li>
         <li>Tu progreso se guarda automáticamente en este navegador.</li>
       </ul>
+      <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
+    </div>
+  </section>
+
+  <!-- Galería de personajes -->
+  <section id="screen-characters" class="screen">
+    <div class="card characters-card">
+      <h2>Personajes de la Biblia</h2>
+      <p class="mission">Del pasado al presente: estos son los personajes cuyas historias inspiran las preguntas y enseñanzas del juego.</p>
+      <div id="characters-list" class="characters-list"></div>
       <button class="btn btn-secondary btn-back-menu">Volver al menú</button>
     </div>
   </section>
@@ -107,6 +122,7 @@
 
 <script src="js/questions.js"></script>
 <script src="js/teachings.js"></script>
+<script src="js/characters.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

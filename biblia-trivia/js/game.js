@@ -115,6 +115,35 @@ function renderLevelGrid() {
   )} / ${TOTAL_LEVELS}`;
 }
 
+/* ---------- Galería de personajes ---------- */
+
+function renderCharacterGallery() {
+  const list = document.getElementById("characters-list");
+  list.innerHTML = "";
+  CHARACTER_GALLERY.forEach((group) => {
+    const section = document.createElement("div");
+    section.className = "character-group";
+
+    const heading = document.createElement("h3");
+    heading.textContent = group.era;
+    section.appendChild(heading);
+
+    const refEl = document.createElement("p");
+    refEl.className = "character-ref";
+    refEl.textContent = group.ref;
+    section.appendChild(refEl);
+
+    group.people.forEach((person) => {
+      const row = document.createElement("p");
+      row.className = "character-row";
+      row.innerHTML = `<strong>${person.name}</strong> — ${person.desc}`;
+      section.appendChild(row);
+    });
+
+    list.appendChild(section);
+  });
+}
+
 /* ---------- Lógica de nivel ---------- */
 
 function startLevel(level) {
@@ -307,6 +336,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("btn-how-to-play").addEventListener("click", () => {
     showScreen("screen-howto");
+  });
+
+  document.getElementById("btn-characters").addEventListener("click", () => {
+    renderCharacterGallery();
+    showScreen("screen-characters");
   });
 
   document.querySelectorAll(".btn-back-menu").forEach((btn) =>

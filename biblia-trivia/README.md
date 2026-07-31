@@ -2,6 +2,8 @@
 
 Juego de preguntas y respuestas sobre la Biblia, 100% en el navegador (HTML, CSS y JavaScript puro, sin dependencias).
 
+**Propósito del juego**: traer las historias del pasado bíblico al presente. No se trata solo de memorizar datos sobre los personajes, sino de ver qué hicieron en el pasado y cómo aplicar ese mismo ejemplo hoy y en el futuro.
+
 ## Cómo jugarlo
 
 Abre `index.html` en cualquier navegador, o sirve la carpeta con un servidor estático:
@@ -14,11 +16,12 @@ python3 -m http.server 8080
 
 ## Estructura
 
-- `index.html` — pantallas del juego (menú, cómo jugar, niveles, juego, resultado).
+- `index.html` — pantallas del juego (menú, cómo jugar, galería de personajes, niveles, juego, resultado).
 - `css/styles.css` — estilos.
 - `js/questions.js` — banco de preguntas (180 en total, 15 por tema), agrupado en 12 temas ("tiers") bíblicos, con personajes de todo el Antiguo y Nuevo Testamento.
-- `js/teachings.js` — enseñanzas bíblicas por tema y retos de aplicación práctica a la vida diaria.
-- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada y guardado del progreso (`localStorage`).
+- `js/teachings.js` — enseñanzas bíblicas por tema: qué hizo el personaje **en el pasado** y cómo aplicarlo **hoy y en el futuro**, con un reto de opción múltiple.
+- `js/characters.js` — Galería de Personajes Bíblicos: más de 200 figuras nombradas, de Génesis a Apocalipsis, agrupadas por época.
+- `js/game.js` — motor del juego: progresión de dificultad, temporizador, vidas, puntaje, enseñanza aplicada, galería de personajes y guardado del progreso (`localStorage`).
 
 ## Diseño de la dificultad (niveles 1 a 120)
 
@@ -47,13 +50,29 @@ Dentro de cada tema, la dificultad sube nivel a nivel mediante:
 
 El progreso (nivel desbloqueado y puntaje total) se guarda automáticamente en el navegador.
 
-## Personajes bíblicos incluidos
+## Galería de Personajes Bíblicos
 
-Las preguntas cubren personajes de toda la Biblia, entre ellos:
+Desde el menú principal, el botón **"Personajes de la Biblia"** abre una galería con más de 200 figuras nombradas, agrupadas en 10 épocas/secciones que recorren toda la Biblia:
 
-- **Antiguo Testamento**: Adán, Eva, Caín, Abel, Set, Enoc, Noé, Abraham, Sara, Agar, Isaac, Jacob, Esaú, Labán, José, Moisés, Miriam, Aarón, Josué, Caleb, Balaam, Débora, Sansón, Rut, Noemí, Booz, Ana, Samuel, Saúl, David, Jonatán, Abigail, Betsabé, Salomón, Elías, Eliseo, Naamán, Job, Isaías, Jeremías, Ezequiel, Daniel, Sadrac/Mesac/Abed-nego, Jonás, Ester, Mardoqueo, Nehemías, Esdras, Melquisedec, entre otros.
-- **Nuevo Testamento**: María, José, Zacarías y Elisabet, Juan el Bautista, Jesús, Pedro, Andrés, Juan, Tomás, Mateo, Judas Iscariote, Matías, Zaqueo, Nicodemo, la mujer samaritana, Marta y María de Betania, Lázaro, Esteban, Saulo/Pablo, Bernabé, Cornelio, Ananías y Safira, Priscila y Aquila, Lidia, Apolos, Timoteo, Tito, Onésimo, Silas, entre otros.
+1. Orígenes: Creación y primeros descendientes (Génesis 1–11)
+2. Los Patriarcas y sus familias (Génesis 12–50)
+3. Éxodo y el desierto
+4. Conquista y Jueces (Josué–Rut)
+5. Reino unido: Samuel, Saúl, David y Salomón
+6. Reinos divididos y sus profetas
+7. Exilio y regreso (Esdras, Nehemías, Ester, Daniel)
+8. Sabiduría, Salmos y profetas menores
+9. Los Evangelios: la vida de Jesús
+10. Hechos y la iglesia primitiva
 
-## Enseñanza aplicada
+**Nota honesta**: la Biblia menciona miles de nombres, muchos solo en genealogías. Esta galería no pretende ser una lista exhaustiva letra por letra, pero cubre de forma amplia y representativa a los personajes con papel narrativo en cada libro y época — todos ellos también aparecen en las preguntas de trivia o inspiran alguna de las enseñanzas aplicadas.
 
-Al superar cada nivel, el juego muestra una **enseñanza bíblica** relacionada con el tema del nivel, una **sugerencia de aplicación práctica** a la vida diaria, y un pequeño **reto de opción múltiple** ("¿cómo la aplicarías en esta situación?"). Responder correctamente el reto otorga 50 puntos de bonus, reforzando que el juego no es solo memorizar datos, sino llevar las enseñanzas a la práctica.
+## Enseñanza aplicada: del pasado al presente
+
+Al superar cada nivel, el juego muestra una **enseñanza bíblica** con una estructura fija:
+
+1. **En el pasado**: qué hizo un personaje bíblico concreto (ej. "En el pasado, David enfrentó a Goliat confiando en Dios...").
+2. **Hoy y en el futuro**: cómo aplicar ese mismo ejemplo a la vida actual (ej. "...ante un problema que parece un gigante, enfrenta el miedo con fe y preparación").
+3. **Reto de aplicación**: una situación de opción múltiple donde el jugador elige la mejor forma de vivir esa enseñanza, ganando 50 puntos de bonus por acertar.
+
+La idea central del juego es esa: no memorizar datos sueltos sobre personajes del pasado, sino traer sus historias al presente y practicar cómo aplicarlas hoy y en el futuro.
