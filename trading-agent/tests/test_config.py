@@ -48,3 +48,44 @@ def test_rejects_negative_max_capital():
 
 def test_accepts_positive_max_capital():
     Config(**base_kwargs(max_capital_usd=500.0))
+
+
+def test_rejects_unknown_broker():
+    with pytest.raises(ValueError):
+        Config(**base_kwargs(broker="coinbase"))
+
+
+def test_binance_requires_credentials():
+    with pytest.raises(ValueError):
+        Config(**base_kwargs(broker="binance", api_key="", secret_key=""))
+
+
+def test_binance_rejects_non_testnet():
+    with pytest.raises(ValueError):
+        Config(
+            **base_kwargs(
+                broker="binance",
+                binance_api_key="k",
+                binance_secret_key="s",
+                binance_testnet=False,
+            )
+        )
+
+
+def test_binance_valid_config_does_not_raise():
+    Config(
+        **base_kwargs(
+            broker="binance",
+            symbols=["BTCUSDT"],
+            api_key="",
+            secret_key="",
+            binance_api_key="k",
+            binance_secret_key="s",
+            binance_testnet=True,
+        )
+    )
+
+
+def test_alpaca_broker_does_not_require_binance_credentials():
+    # el default es broker=alpaca; no debe exigir credenciales de binance
+    Config(**base_kwargs())

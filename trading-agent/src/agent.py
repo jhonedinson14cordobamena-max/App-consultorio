@@ -11,10 +11,9 @@ Incorpora tres salvaguardas exigidas antes de considerar cuenta real:
 from __future__ import annotations
 
 import logging
+from datetime import date, datetime, timezone
 
-from alpaca.trading.enums import OrderSide
-
-from .broker import Broker
+from .brokers.base import BrokerBase, Side
 from .config import Config
 from .notifier import Notifier
 from .risk import RiskManager
@@ -28,7 +27,7 @@ class TradingAgent:
     def __init__(
         self,
         config: Config,
-        broker: Broker,
+        broker: BrokerBase,
         strategy: Strategy,
         risk: RiskManager,
         notifier: Notifier | None = None,
@@ -41,10 +40,16 @@ class TradingAgent:
         self.notifier = notifier or Notifier(config)
         self.state_store = state_store or StateStore()
         self._equity_start_of_day: float | None = None
+        self._equity_start_of_day_date: date | None = None
 
     def _ensure_start_of_day_equity(self) -> float:
-        if self._equity_start_of_day is None:
+        today = datetime.now(timezone.utc).date()
+        if self._equity_start_of_day is None or self._equity_start_of_day_date != today:
+            # Se recalcula en cada cambio de dia UTC. Es indispensable para
+            # brokers 24/7 (cripto), donde el proceso puede correr semanas
+            # sin reiniciarse y el freno "diario" debe seguir siendo diario.
             self._equity_start_of_day = self.broker.get_account_equity()
+            self._equity_start_of_day_date = today
         return self._equity_start_of_day
 
     def _capped_equity(self, equity_now: float) -> float:
@@ -104,7 +109,7 @@ class TradingAgent:
         if signal == Signal.BUY and current_qty == 0:
             stop_price = self.risk.stop_loss_price(last_price, "buy")
             qty = self.risk.position_size(equity_now, last_price, stop_price)
-            order = self.broker.submit_market_order_with_stop(symbol, qty, OrderSide.BUY, stop_price)
+            order = self.broker.submit_market_order_with_stop(symbol, qty, Side.BUY, stop_price)
             if order is not None:
                 self.notifier.notify_order(
                     "COMPRA", symbol, qty, last_price, f"Stop-loss: {stop_price}"

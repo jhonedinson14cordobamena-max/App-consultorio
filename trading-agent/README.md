@@ -1,8 +1,11 @@
 # trading-agent
 
-Agente de **paper trading** (dinero simulado) que evalua acciones con una
-estrategia de cruce de medias moviles (SMA crossover) y opera automaticamente
-a traves de la API de [Alpaca](https://alpaca.markets/).
+Agente de trading **simulado** (dinero de mentira, datos de mercado reales)
+que evalua simbolos con una estrategia de cruce de medias moviles (SMA
+crossover) y opera automaticamente a traves de [Alpaca](https://alpaca.markets/)
+(acciones/ETFs, paper trading) o [Binance](https://testnet.binance.vision)
+(cripto, spot testnet). Se usa un broker a la vez, seleccionable con
+`BROKER=alpaca` o `BROKER=binance` en `.env`.
 
 ## Advertencia importante
 
@@ -10,8 +13,9 @@ a traves de la API de [Alpaca](https://alpaca.markets/).
 aqui ni en ningun fondo cuantitativo del mundo. Los mercados tienen ruido
 irreducible (noticias, liquidez, otros algoritmos). Este proyecto:
 
-- Opera **solo en modo paper (simulado)** por diseno. El codigo (`Config`)
-  rechaza explicitamente `ALPACA_PAPER=false`.
+- Opera **solo en modo simulado** por diseno. El codigo (`Config`) rechaza
+  explicitamente `ALPACA_PAPER=false` (Alpaca) y `BINANCE_TESTNET=false`
+  (Binance) sin importar cual broker este activo.
 - Incluye un **backtester** para medir honestamente el desempeno historico
   de la estrategia (retorno, win rate, drawdown) antes de confiar en ella.
 - Incluye gestion de riesgo (tamano de posicion, stop-loss, tope de capital,
@@ -46,15 +50,16 @@ cuenta real, y estan activas incluso en paper trading para poder probarlas:
    configurado, las notificaciones solo quedan en el log.
 
 Ir a cuenta real ademas requeriria (no implementado todavia, a proposito):
-revisar y quitar el guard de `Config.paper`, usar las credenciales reales de
-Alpaca (no las de paper), y haber corrido el agente en paper el tiempo
-suficiente para confiar en las metricas del backtest y del historial real
-de ejecucion.
+revisar y quitar el guard de `Config.paper` / `Config.binance_testnet`, usar
+credenciales reales (no las de paper/testnet), y haber corrido el agente el
+tiempo suficiente para confiar en las metricas del backtest y del historial
+real de ejecucion.
 
 ## Requisitos
 
 - Python 3.11+
-- Una cuenta gratuita de paper trading en Alpaca: https://app.alpaca.markets/paper/dashboard/overview
+- Para Alpaca: cuenta gratuita de paper trading — https://app.alpaca.markets/paper/dashboard/overview
+- Para Binance: claves de testnet (inicia sesion con GitHub) — https://testnet.binance.vision
 
 ## Instalacion
 
@@ -64,7 +69,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Edita .env con tus API keys de PAPER TRADING de Alpaca
+# Edita .env: elige BROKER=alpaca o BROKER=binance y completa las claves
+# correspondientes (siempre de paper trading / testnet, nunca las reales)
 ```
 
 ## Uso
@@ -74,7 +80,8 @@ cp .env.example .env
 Prueba la estrategia contra datos historicos reales y mira las metricas:
 
 ```bash
-python main.py backtest --symbol AAPL --days 400
+python main.py backtest --symbol AAPL --days 400      # con BROKER=alpaca
+python main.py backtest --symbol BTCUSDT --days 400   # con BROKER=binance
 ```
 
 Salida esperada: retorno total, numero de operaciones, win rate y max
@@ -94,7 +101,10 @@ python main.py run
 ```
 
 Evalua todos los `SYMBOLS` configurados cada `POLL_INTERVAL_MINUTES`
-minutos, solo cuando el mercado esta abierto.
+minutos. Con Alpaca, solo cuando el mercado de acciones esta abierto; con
+Binance evalua siempre (cripto opera 24/7). El freno de perdida "diaria"
+se recalcula automaticamente en cada cambio de dia (UTC), incluso si el
+proceso lleva semanas corriendo sin reiniciarse.
 
 ### 4. Reactivar tras un kill switch
 
@@ -108,17 +118,21 @@ Muestra el motivo del halt y pide confirmacion explicita antes de reanudar.
 
 ```
 trading-agent/
-├── main.py              # CLI: backtest / run / reset-halt
+├── main.py                    # CLI: backtest / run / reset-halt
 ├── src/
-│   ├── config.py         # Carga de .env y validaciones de seguridad
-│   ├── broker.py         # Wrapper sobre alpaca-py (datos + ordenes)
-│   ├── strategy.py        # Estrategia SMA crossover (reemplazable)
-│   ├── risk.py            # Tamano de posicion, stop-loss, frenos de perdida
-│   ├── state.py            # Kill switch persistente (state/agent_state.json)
-│   ├── notifier.py          # Notificaciones por email (best-effort)
-│   ├── agent.py             # Bucle de evaluacion y decision
-│   └── backtest.py          # Backtester vectorizado
-└── tests/                # Tests unitarios (no requieren red ni API keys)
+│   ├── config.py               # Carga de .env y validaciones de seguridad
+│   ├── brokers/
+│   │   ├── base.py              # Interfaz comun (BrokerBase, Side, BarInterval)
+│   │   ├── alpaca_broker.py     # Implementacion sobre alpaca-py (paper)
+│   │   ├── binance_broker.py    # Implementacion sobre python-binance (testnet)
+│   │   └── __init__.py          # create_broker(config) -> BrokerBase
+│   ├── strategy.py              # Estrategia SMA crossover (reemplazable)
+│   ├── risk.py                  # Tamano de posicion, stop-loss, frenos de perdida
+│   ├── state.py                 # Kill switch persistente (state/agent_state.json)
+│   ├── notifier.py               # Notificaciones por email (best-effort)
+│   ├── agent.py                  # Bucle de evaluacion y decision (agnostico al broker)
+│   └── backtest.py               # Backtester vectorizado
+└── tests/                    # Tests unitarios (no requieren red ni API keys)
 ```
 
 ## Tests
@@ -133,7 +147,19 @@ pytest -v
 - **Otra estrategia**: crea una clase con `required_bars()` y
   `generate_signal(bars) -> Signal` (ver `src/strategy.py`) y pasala a
   `TradingAgent` en `main.py`.
-- **Mas simbolos**: agrega a `SYMBOLS` en `.env`.
-- **Otro bróker**: reemplaza `src/broker.py` manteniendo la misma interfaz
-  publica (`get_bars`, `get_account_equity`, `submit_market_order_with_stop`,
-  etc.) para no tocar `agent.py`.
+- **Mas simbolos**: agrega a `SYMBOLS` en `.env` (formato segun el broker
+  activo: `AAPL,MSFT` para Alpaca, `BTCUSDT,ETHUSDT` para Binance).
+- **Otro broker**: implementa `BrokerBase` (`src/brokers/base.py`) en un
+  archivo nuevo dentro de `src/brokers/` y agregalo a `create_broker()` en
+  `src/brokers/__init__.py`. `agent.py` no necesita cambios: solo conoce la
+  interfaz comun.
+
+## Limitaciones conocidas (Binance)
+
+- Solo opera contra pares cotizados en `USDT` (ej. `BTCUSDT`), para poder
+  calcular el equity en una sola moneda.
+- El stop-loss se implementa como una orden `STOP_LOSS_LIMIT` separada tras
+  la compra a mercado (no es una orden OCO atomica como el bracket order de
+  Alpaca). Si la orden de stop falla despues de una compra exitosa, la
+  posicion queda sin proteccion automatica y se registra un error explicito
+  en el log — revisar manualmente en ese caso.

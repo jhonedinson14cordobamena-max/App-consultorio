@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
+
+
+_VALID_BROKERS = ("alpaca", "binance")
 
 
 @dataclass(frozen=True)
@@ -26,13 +29,41 @@ class Config:
     smtp_port: int
     smtp_user: str | None
     smtp_password: str | None
+    broker: str = "alpaca"
+    binance_api_key: str | None = None
+    binance_secret_key: str | None = None
+    binance_testnet: bool = True
 
     def __post_init__(self) -> None:
-        if not self.api_key or not self.secret_key:
-            raise ValueError(
-                "Faltan ALPACA_API_KEY / ALPACA_SECRET_KEY. Copia .env.example a .env "
-                "y completa tus credenciales de paper trading."
-            )
+        if self.broker not in _VALID_BROKERS:
+            raise ValueError(f"BROKER debe ser uno de {_VALID_BROKERS}, recibido: {self.broker!r}")
+
+        if self.broker == "alpaca":
+            if not self.api_key or not self.secret_key:
+                raise ValueError(
+                    "Faltan ALPACA_API_KEY / ALPACA_SECRET_KEY. Copia .env.example a .env "
+                    "y completa tus credenciales de paper trading."
+                )
+            if not self.paper:
+                raise ValueError(
+                    "Este agente esta configurado para operar UNICAMENTE en modo paper "
+                    "(ALPACA_PAPER=true). Operar con dinero real requiere una revision "
+                    "manual deliberada del codigo, no solo cambiar esta variable."
+                )
+
+        if self.broker == "binance":
+            if not self.binance_api_key or not self.binance_secret_key:
+                raise ValueError(
+                    "Faltan BINANCE_API_KEY / BINANCE_SECRET_KEY. Genera claves en "
+                    "https://testnet.binance.vision y completa .env."
+                )
+            if not self.binance_testnet:
+                raise ValueError(
+                    "Este agente esta configurado para operar UNICAMENTE contra el testnet "
+                    "de Binance (BINANCE_TESTNET=true). Operar con dinero real requiere una "
+                    "revision manual deliberada del codigo, no solo cambiar esta variable."
+                )
+
         if not self.symbols:
             raise ValueError("SYMBOLS no puede estar vacio.")
         if self.fast_sma_period >= self.slow_sma_period:
@@ -46,12 +77,6 @@ class Config:
             )
         if self.max_capital_usd is not None and self.max_capital_usd <= 0:
             raise ValueError("MAX_CAPITAL_USD debe ser positivo si se define.")
-        if not self.paper:
-            raise ValueError(
-                "Este agente esta configurado para operar UNICAMENTE en modo paper "
-                "(ALPACA_PAPER=true). Operar con dinero real requiere una revision "
-                "manual deliberada del codigo, no solo cambiar esta variable."
-            )
 
 
 def load_config(env_file: str | None = ".env") -> Config:
@@ -70,6 +95,10 @@ def load_config(env_file: str | None = ".env") -> Config:
         api_key=os.getenv("ALPACA_API_KEY", ""),
         secret_key=os.getenv("ALPACA_SECRET_KEY", ""),
         paper=_get_bool("ALPACA_PAPER", True),
+        broker=os.getenv("BROKER", "alpaca").strip().lower(),
+        binance_api_key=os.getenv("BINANCE_API_KEY") or None,
+        binance_secret_key=os.getenv("BINANCE_SECRET_KEY") or None,
+        binance_testnet=_get_bool("BINANCE_TESTNET", True),
         symbols=symbols,
         fast_sma_period=int(os.getenv("FAST_SMA_PERIOD", "20")),
         slow_sma_period=int(os.getenv("SLOW_SMA_PERIOD", "50")),

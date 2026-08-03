@@ -12,11 +12,9 @@ import argparse
 import logging
 import time
 
-from alpaca.data.timeframe import TimeFrame
-
 from src.agent import TradingAgent
 from src.backtest import run_backtest
-from src.broker import Broker
+from src.brokers import create_broker
 from src.config import load_config
 from src.notifier import Notifier
 from src.risk import RiskManager
@@ -32,10 +30,10 @@ logger = logging.getLogger("main")
 
 def cmd_backtest(args: argparse.Namespace) -> None:
     config = load_config()
-    broker = Broker(config)
+    broker = create_broker(config)
     strategy = Strategy(config.fast_sma_period, config.slow_sma_period)
 
-    bars = broker.get_bars(args.symbol, lookback_bars=args.days, timeframe=TimeFrame.Day)
+    bars = broker.get_bars(args.symbol, lookback_bars=args.days)
     if bars.empty:
         logger.error("No se obtuvieron datos historicos para %s", args.symbol)
         return
@@ -47,7 +45,7 @@ def cmd_backtest(args: argparse.Namespace) -> None:
 
 def cmd_run(args: argparse.Namespace) -> None:
     config = load_config()
-    broker = Broker(config)
+    broker = create_broker(config)
     strategy = Strategy(config.fast_sma_period, config.slow_sma_period)
     risk = RiskManager(config.risk_per_trade_pct, config.max_daily_loss_pct, config.stop_loss_pct)
     notifier = Notifier(config)
@@ -64,7 +62,8 @@ def cmd_run(args: argparse.Namespace) -> None:
         return
 
     logger.info(
-        "Agente iniciado en modo PAPER TRADING. Simbolos: %s. Capital max: %s. Intervalo: %s min.",
+        "Agente iniciado (broker=%s, simulado/testnet). Simbolos: %s. Capital max: %s. Intervalo: %s min.",
+        config.broker,
         config.symbols,
         config.max_capital_usd or "sin tope (usa equity de la cuenta)",
         config.poll_interval_minutes,
@@ -98,7 +97,7 @@ def cmd_reset_halt(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Agente de paper trading (Alpaca)")
+    parser = argparse.ArgumentParser(description="Agente de trading simulado (Alpaca paper / Binance testnet)")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     backtest_parser = subparsers.add_parser("backtest", help="Probar la estrategia con datos historicos")
