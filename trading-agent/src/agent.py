@@ -11,7 +11,6 @@ Incorpora tres salvaguardas exigidas antes de considerar cuenta real:
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timezone
 
 from .brokers.base import BrokerBase, Side
 from .config import Config
@@ -39,18 +38,6 @@ class TradingAgent:
         self.risk = risk
         self.notifier = notifier or Notifier(config)
         self.state_store = state_store or StateStore()
-        self._equity_start_of_day: float | None = None
-        self._equity_start_of_day_date: date | None = None
-
-    def _ensure_start_of_day_equity(self) -> float:
-        today = datetime.now(timezone.utc).date()
-        if self._equity_start_of_day is None or self._equity_start_of_day_date != today:
-            # Se recalcula en cada cambio de dia UTC. Es indispensable para
-            # brokers 24/7 (cripto), donde el proceso puede correr semanas
-            # sin reiniciarse y el freno "diario" debe seguir siendo diario.
-            self._equity_start_of_day = self.broker.get_account_equity()
-            self._equity_start_of_day_date = today
-        return self._equity_start_of_day
 
     def _capped_equity(self, equity_now: float) -> float:
         if self.config.max_capital_usd is None:
@@ -71,8 +58,8 @@ class TradingAgent:
             logger.info("Mercado cerrado, no se hace nada en este ciclo.")
             return
 
-        equity_start = self._ensure_start_of_day_equity()
         equity_now = self.broker.get_account_equity()
+        equity_start = self.state_store.ensure_start_of_day_equity(equity_now)
         baseline_equity = self.state_store.ensure_baseline(equity_now)
 
         if self.risk.daily_loss_limit_hit(equity_start, equity_now):

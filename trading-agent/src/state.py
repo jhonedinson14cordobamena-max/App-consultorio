@@ -19,6 +19,8 @@ DEFAULT_STATE_PATH = Path(__file__).resolve().parent.parent / "state" / "agent_s
 @dataclass
 class AgentState:
     baseline_equity: float | None = None
+    equity_start_of_day: float | None = None
+    equity_start_of_day_date: str | None = None  # ISO date (UTC), ej. "2026-08-05"
     halted: bool = False
     halted_reason: str | None = None
     halted_at: str | None = None
@@ -45,6 +47,20 @@ class StateStore:
             self.save(state)
         return state.baseline_equity
 
+    def ensure_start_of_day_equity(self, equity_now: float) -> float:
+        """Equity de referencia para el freno de perdida DIARIA. Persistido
+        en disco (no solo en memoria del proceso): si el agente se reinicia
+        a mitad del dia justo despues de una perdida grande, debe seguir
+        comparando contra el equity de inicio de ese mismo dia, no contra
+        el equity ya reducido del momento del reinicio."""
+        today = datetime.now(timezone.utc).date().isoformat()
+        state = self.load()
+        if state.equity_start_of_day is None or state.equity_start_of_day_date != today:
+            state.equity_start_of_day = equity_now
+            state.equity_start_of_day_date = today
+            self.save(state)
+        return state.equity_start_of_day
+
     def is_halted(self) -> tuple[bool, str | None]:
         state = self.load()
         return state.halted, state.halted_reason
@@ -58,10 +74,14 @@ class StateStore:
 
     def reset_halt(self) -> None:
         """Reactivacion manual explicita. Tambien reinicia el baseline de
-        perdida total, para que el usuario empiece de cero conscientemente."""
+        perdida total y el de perdida diaria, para que el usuario empiece
+        de cero conscientemente en vez de arrastrar un punto de referencia
+        de antes del halt."""
         state = self.load()
         state.halted = False
         state.halted_reason = None
         state.halted_at = None
         state.baseline_equity = None
+        state.equity_start_of_day = None
+        state.equity_start_of_day_date = None
         self.save(state)
