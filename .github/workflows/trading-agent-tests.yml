@@ -1,0 +1,32 @@
+name: trading-agent tests
+
+on:
+  push:
+    paths:
+      - "trading-agent/**"
+      - ".github/workflows/trading-agent-tests.yml"
+  pull_request:
+    paths:
+      - "trading-agent/**"
+      - ".github/workflows/trading-agent-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trading-agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: trading-agent/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest -v

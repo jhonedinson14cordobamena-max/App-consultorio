@@ -1,0 +1,76 @@
+name: trading-agent backtest (manual)
+
+# Corre el backtest desde el navegador, sin terminal ni instalar nada:
+# pestana "Actions" del repo -> este workflow -> boton "Run workflow".
+#
+# Con broker=binance no hace falta configurar ningun secret: el backtest
+# solo lee datos publicos de precios (Binance real, sin credenciales) y
+# nunca coloca ordenes. Con broker=xtb hacen falta los secrets del repo
+# XTB_USER_ID/XTB_PASSWORD (de una cuenta DEMO). Con broker=alpaca hacen
+# falta los secrets ALPACA_API_KEY/ALPACA_SECRET_KEY (de una cuenta PAPER).
+on:
+  workflow_dispatch:
+    inputs:
+      broker:
+        description: "Broker: binance (no requiere secrets), xtb (requiere secrets XTB_USER_ID/XTB_PASSWORD) o alpaca (requiere secrets ALPACA_API_KEY/ALPACA_SECRET_KEY)"
+        required: true
+        default: "binance"
+        type: choice
+        options:
+          - binance
+          - xtb
+          - alpaca
+      symbol:
+        description: "Simbolo (ej. BTCUSDT / ETHUSDT para binance, AAPL / MSFT para xtb o alpaca)"
+        required: true
+        default: "BTCUSDT"
+      days:
+        description: "Cuantas barras diarias historicas usar"
+        required: true
+        default: "400"
+      fast_sma:
+        description: "Periodo de la SMA rapida"
+        required: true
+        default: "20"
+      slow_sma:
+        description: "Periodo de la SMA lenta"
+        required: true
+        default: "50"
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: trading-agent
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: trading-agent/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run backtest
+        env:
+          BROKER: ${{ inputs.broker }}
+          SYMBOLS: ${{ inputs.symbol }}
+          FAST_SMA_PERIOD: ${{ inputs.fast_sma }}
+          SLOW_SMA_PERIOD: ${{ inputs.slow_sma }}
+          # Solo para satisfacer la validacion de Config: el backtest de
+          # Binance nunca usa estas credenciales (get_bars pide datos
+          # publicos), por eso es seguro dejarlas como texto fijo aqui.
+          BINANCE_API_KEY: "solo-lectura-datos-publicos-no-se-usa"
+          BINANCE_SECRET_KEY: "solo-lectura-datos-publicos-no-se-usa"
+          BINANCE_TESTNET: "true"
+          ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: "true"
+          XTB_USER_ID: ${{ secrets.XTB_USER_ID }}
+          XTB_PASSWORD: ${{ secrets.XTB_PASSWORD }}
+          XTB_DEMO: "true"
+        run: python main.py backtest --symbol "${{ inputs.symbol }}" --days "${{ inputs.days }}"
