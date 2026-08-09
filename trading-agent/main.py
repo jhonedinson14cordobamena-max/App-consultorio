@@ -97,7 +97,9 @@ def cmd_reset_halt(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Agente de trading simulado (Alpaca paper / Binance testnet)")
+    parser = argparse.ArgumentParser(
+        description="Agente de trading simulado (XTB demo / Alpaca paper / Binance testnet)"
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     backtest_parser = subparsers.add_parser("backtest", help="Probar la estrategia con datos historicos")

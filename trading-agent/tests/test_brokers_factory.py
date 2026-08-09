@@ -3,6 +3,7 @@ import pytest
 from src.brokers import create_broker
 from src.brokers.alpaca_broker import AlpacaBroker
 from src.brokers.binance_broker import BinanceBroker
+from src.brokers.xtb_broker import XTBBroker
 from tests.test_config import base_kwargs
 from src.config import Config
 
@@ -25,6 +26,21 @@ def test_create_broker_binance_returns_binance_broker():
     )
     broker = create_broker(config)
     assert isinstance(broker, BinanceBroker)
+
+
+def test_create_broker_xtb_returns_xtb_broker():
+    config = Config(
+        **base_kwargs(
+            broker="xtb",
+            xtb_user_id="u",
+            xtb_password="p",
+            xtb_demo=True,
+        )
+    )
+    broker = create_broker(config)
+    assert isinstance(broker, XTBBroker)
+    # construir el broker no debe abrir la conexion websocket (login perezoso)
+    assert broker._logged_in is False
 
 
 def test_create_broker_unknown_raises():

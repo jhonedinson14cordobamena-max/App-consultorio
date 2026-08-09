@@ -3,24 +3,25 @@ name: trading-agent backtest (manual)
 # Corre el backtest desde el navegador, sin terminal ni instalar nada:
 # pestana "Actions" del repo -> este workflow -> boton "Run workflow".
 #
-# Con broker=binance (por defecto) no hace falta configurar ningun secret:
-# el backtest solo lee datos publicos de precios (Binance real, sin
-# credenciales) y nunca coloca ordenes. Con broker=alpaca hacen falta los
-# secrets del repo ALPACA_API_KEY / ALPACA_SECRET_KEY (de una cuenta de
-# PAPER trading).
+# Con broker=binance no hace falta configurar ningun secret: el backtest
+# solo lee datos publicos de precios (Binance real, sin credenciales) y
+# nunca coloca ordenes. Con broker=xtb hacen falta los secrets del repo
+# XTB_USER_ID/XTB_PASSWORD (de una cuenta DEMO). Con broker=alpaca hacen
+# falta los secrets ALPACA_API_KEY/ALPACA_SECRET_KEY (de una cuenta PAPER).
 on:
   workflow_dispatch:
     inputs:
       broker:
-        description: "Broker: binance (no requiere secrets) o alpaca (requiere secrets ALPACA_API_KEY/ALPACA_SECRET_KEY)"
+        description: "Broker: binance (no requiere secrets), xtb (requiere secrets XTB_USER_ID/XTB_PASSWORD) o alpaca (requiere secrets ALPACA_API_KEY/ALPACA_SECRET_KEY)"
         required: true
         default: "binance"
         type: choice
         options:
           - binance
+          - xtb
           - alpaca
       symbol:
-        description: "Simbolo (ej. BTCUSDT / ETHUSDT para binance, AAPL / MSFT para alpaca)"
+        description: "Simbolo (ej. BTCUSDT / ETHUSDT para binance, AAPL / MSFT para xtb o alpaca)"
         required: true
         default: "BTCUSDT"
       days:
@@ -69,4 +70,7 @@ jobs:
           ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: "true"
+          XTB_USER_ID: ${{ secrets.XTB_USER_ID }}
+          XTB_PASSWORD: ${{ secrets.XTB_PASSWORD }}
+          XTB_DEMO: "true"
         run: python main.py backtest --symbol "${{ inputs.symbol }}" --days "${{ inputs.days }}"

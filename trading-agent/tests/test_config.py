@@ -87,5 +87,36 @@ def test_binance_valid_config_does_not_raise():
 
 
 def test_alpaca_broker_does_not_require_binance_credentials():
-    # el default es broker=alpaca; no debe exigir credenciales de binance
+    # el default del dataclass es broker=alpaca; no debe exigir credenciales
+    # de binance ni de xtb (load_config, en cambio, usa xtb como default)
     Config(**base_kwargs())
+
+
+def test_xtb_requires_credentials():
+    with pytest.raises(ValueError):
+        Config(**base_kwargs(broker="xtb"))
+
+
+def test_xtb_rejects_non_demo():
+    with pytest.raises(ValueError):
+        Config(
+            **base_kwargs(
+                broker="xtb",
+                xtb_user_id="u",
+                xtb_password="p",
+                xtb_demo=False,
+            )
+        )
+
+
+def test_xtb_valid_config_does_not_raise():
+    Config(
+        **base_kwargs(
+            broker="xtb",
+            api_key="",
+            secret_key="",
+            xtb_user_id="u",
+            xtb_password="p",
+            xtb_demo=True,
+        )
+    )

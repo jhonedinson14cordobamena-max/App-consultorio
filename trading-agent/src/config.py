@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from dotenv import load_dotenv
 
 
-_VALID_BROKERS = ("alpaca", "binance")
+_VALID_BROKERS = ("alpaca", "binance", "xtb")
 
 
 @dataclass(frozen=True)
@@ -33,6 +33,9 @@ class Config:
     binance_api_key: str | None = None
     binance_secret_key: str | None = None
     binance_testnet: bool = True
+    xtb_user_id: str | None = None
+    xtb_password: str | None = None
+    xtb_demo: bool = True
 
     def __post_init__(self) -> None:
         if self.broker not in _VALID_BROKERS:
@@ -61,6 +64,19 @@ class Config:
                 raise ValueError(
                     "Este agente esta configurado para operar UNICAMENTE contra el testnet "
                     "de Binance (BINANCE_TESTNET=true). Operar con dinero real requiere una "
+                    "revision manual deliberada del codigo, no solo cambiar esta variable."
+                )
+
+        if self.broker == "xtb":
+            if not self.xtb_user_id or not self.xtb_password:
+                raise ValueError(
+                    "Faltan XTB_USER_ID / XTB_PASSWORD. Usa las credenciales de tu cuenta "
+                    "DEMO de XTB (no la real)."
+                )
+            if not self.xtb_demo:
+                raise ValueError(
+                    "Este agente esta configurado para operar UNICAMENTE contra la cuenta "
+                    "DEMO de XTB (XTB_DEMO=true). Operar con la cuenta real requiere una "
                     "revision manual deliberada del codigo, no solo cambiar esta variable."
                 )
 
@@ -95,10 +111,13 @@ def load_config(env_file: str | None = ".env") -> Config:
         api_key=os.getenv("ALPACA_API_KEY", ""),
         secret_key=os.getenv("ALPACA_SECRET_KEY", ""),
         paper=_get_bool("ALPACA_PAPER", True),
-        broker=os.getenv("BROKER", "alpaca").strip().lower(),
+        broker=os.getenv("BROKER", "xtb").strip().lower(),
         binance_api_key=os.getenv("BINANCE_API_KEY") or None,
         binance_secret_key=os.getenv("BINANCE_SECRET_KEY") or None,
         binance_testnet=_get_bool("BINANCE_TESTNET", True),
+        xtb_user_id=os.getenv("XTB_USER_ID") or None,
+        xtb_password=os.getenv("XTB_PASSWORD") or None,
+        xtb_demo=_get_bool("XTB_DEMO", True),
         symbols=symbols,
         fast_sma_period=int(os.getenv("FAST_SMA_PERIOD", "20")),
         slow_sma_period=int(os.getenv("SLOW_SMA_PERIOD", "50")),

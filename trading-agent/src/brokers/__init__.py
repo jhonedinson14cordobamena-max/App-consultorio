@@ -15,4 +15,8 @@ def create_broker(config: Config) -> BrokerBase:
         from .binance_broker import BinanceBroker
 
         return BinanceBroker(config)
-    raise ValueError(f"Broker desconocido: {config.broker!r} (usa 'alpaca' o 'binance')")
+    if config.broker == "xtb":
+        from .xtb_broker import XTBBroker
+
+        return XTBBroker(config)
+    raise ValueError(f"Broker desconocido: {config.broker!r} (usa 'alpaca', 'binance' o 'xtb')")
