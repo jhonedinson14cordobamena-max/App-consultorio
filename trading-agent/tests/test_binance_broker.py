@@ -22,9 +22,13 @@ def make_config(**overrides) -> Config:
 
 
 def make_broker() -> BinanceBroker:
-    with patch("src.brokers.binance_broker.Client") as MockClient:
+    """_client (testnet, credenciales) y _market_client (Binance real, publico)
+    se reemplazan por mocks INDEPENDIENTES a proposito, para que un test que
+    use el mock equivocado falle en vez de pasar por accidente."""
+    with patch("src.brokers.binance_broker.Client"):
         broker = BinanceBroker(make_config())
-        broker._client = MockClient.return_value
+    broker._client = MagicMock(name="testnet_client")
+    broker._market_client = MagicMock(name="public_market_client")
     return broker
 
 
@@ -41,7 +45,7 @@ def test_base_asset_rejects_non_usdt_pairs():
 def test_get_bars_parses_klines_into_dataframe():
     broker = make_broker()
     # [open_time, open, high, low, close, volume, close_time, ...]
-    broker._client.get_klines.return_value = [
+    broker._market_client.get_klines.return_value = [
         [1700000000000, "100", "105", "95", "101.5", "10", 0, 0, 0, 0, 0, 0],
         [1700086400000, "101.5", "106", "99", "103.25", "12", 0, 0, 0, 0, 0, 0],
     ]
@@ -49,12 +53,13 @@ def test_get_bars_parses_klines_into_dataframe():
     bars = broker.get_bars("BTCUSDT", lookback_bars=2, interval=BarInterval.ONE_DAY)
 
     assert list(bars["close"]) == [101.5, 103.25]
-    broker._client.get_klines.assert_called_once_with(symbol="BTCUSDT", interval="1d", limit=2)
+    broker._market_client.get_klines.assert_called_once_with(symbol="BTCUSDT", interval="1d", limit=2)
+    broker._client.get_klines.assert_not_called()  # nunca contra el testnet
 
 
 def test_get_bars_empty_klines_returns_empty_dataframe():
     broker = make_broker()
-    broker._client.get_klines.return_value = []
+    broker._market_client.get_klines.return_value = []
     bars = broker.get_bars("BTCUSDT", lookback_bars=10)
     assert bars.empty
 
@@ -67,12 +72,13 @@ def test_get_account_equity_sums_usdt_and_position_value():
             {"asset": "BTC", "free": "0.5", "locked": "0.1"},
         ]
     }
-    broker._client.get_symbol_ticker.return_value = {"symbol": "BTCUSDT", "price": "20000"}
+    broker._market_client.get_symbol_ticker.return_value = {"symbol": "BTCUSDT", "price": "20000"}
 
     equity = broker.get_account_equity()
 
     # 1000 USDT + 0.6 BTC * 20000 = 13000
     assert equity == 13000.0
+    broker._client.get_symbol_ticker.assert_not_called()  # el precio viene del cliente publico
 
 
 def test_get_open_position_qty_sums_free_and_locked():
@@ -114,6 +120,8 @@ def test_submit_market_order_with_stop_rounds_qty_and_places_two_orders():
     assert stop_call["side"] == "SELL"
     assert stop_call["type"] == "STOP_LOSS_LIMIT"
     assert stop_call["quantity"] == pytest.approx(0.1234)
+
+    broker._market_client.create_order.assert_not_called()  # ordenes solo van al testnet
 
 
 def test_submit_market_order_with_zero_qty_after_rounding_does_nothing():

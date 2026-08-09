@@ -1,9 +1,16 @@
 """Implementacion de BrokerBase sobre python-binance (Binance Spot Testnet).
 
-Toda instancia creada aqui apunta SIEMPRE al testnet de Binance (ver
-Config, que rechaza BINANCE_TESTNET=false), por la misma razon que Alpaca
-esta fijado a paper: separar "conectar con el exchange" de "arriesgar
-dinero real" es una salvaguarda deliberada, no un detalle de configuracion.
+Toda ORDEN (compra, venta, stop-loss, consulta de balance/posicion) se
+envia SIEMPRE al testnet de Binance (ver Config, que rechaza
+BINANCE_TESTNET=false), por la misma razon que Alpaca esta fijado a
+paper: separar "conectar con el exchange" de "arriesgar dinero real" es
+una salvaguarda deliberada, no un detalle de configuracion.
+
+Los DATOS DE MERCADO (velas historicas, precio actual) se piden aparte,
+contra Binance real, con un cliente publico sin credenciales
+(`_market_client`). Esto es intencional y seguro: son endpoints de solo
+lectura que nunca colocan ordenes, y el testnet no tiene suficiente
+historial para que un backtest sea representativo.
 
 Solo opera contra pares cotizados en USDT (ej. BTCUSDT, ETHUSDT) para
 poder calcular un "equity" simple en una sola moneda.
@@ -51,6 +58,7 @@ class BinanceBroker(BrokerBase):
     def __init__(self, config: Config) -> None:
         self.config = config
         self._client = Client(config.binance_api_key, config.binance_secret_key, testnet=True, ping=False)
+        self._market_client = Client(ping=False)  # publico, sin credenciales, Binance real
         self._filters_cache: dict[str, dict] = {}
 
     def _symbol_filters(self, symbol: str) -> dict:
@@ -78,7 +86,7 @@ class BinanceBroker(BrokerBase):
             qty = balances.get(base, 0.0)
             if qty <= 0:
                 continue
-            price = float(self._client.get_symbol_ticker(symbol=symbol)["price"])
+            price = float(self._market_client.get_symbol_ticker(symbol=symbol)["price"])
             equity += qty * price
         return equity
 
@@ -88,7 +96,7 @@ class BinanceBroker(BrokerBase):
     def get_bars(
         self, symbol: str, lookback_bars: int, interval: BarInterval = BarInterval.ONE_DAY
     ) -> pd.DataFrame:
-        klines = self._client.get_klines(
+        klines = self._market_client.get_klines(
             symbol=symbol, interval=_INTERVAL_MAP[interval], limit=lookback_bars
         )
         if not klines:
