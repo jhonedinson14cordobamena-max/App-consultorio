@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Consigue Empleo en 48 Horas | Bolsa de Empleo Colombia</title>
+<meta name="description" content="Conectamos tu hoja de vida con empresas que están contratando en Colombia. Regístrate y empieza a recibir ofertas en 48 horas." />
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">Empleo<span>48h</span></a>
+    <nav class="main-nav">
+      <a href="/empleos.html">Ver ofertas</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="/admin.html">Publicar oferta</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <h1>Consigue empleo en <span class="highlight">48 horas</span></h1>
+    <p>Te conectamos directamente con empresas en Colombia que están contratando ahora mismo. Sin intermediarios, sin filas, sin esperar semanas.</p>
+    <div class="hero-actions">
+      <a href="/empleos.html" class="btn btn-primary">Ver ofertas disponibles</a>
+      <a href="#como-funciona" class="btn btn-outline">Cómo funciona</a>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num" id="statJobs">--</div>
+      <div class="label">Ofertas activas</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">48h</div>
+      <div class="label">Tiempo promedio de respuesta</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">100%</div>
+      <div class="label">Contacto directo con la empresa</div>
+    </div>
+  </div>
+</div>
+
+<section id="como-funciona">
+  <div class="container">
+    <h2 class="section-title">¿Cómo funciona?</h2>
+    <p class="section-subtitle">Un proceso simple para conectarte con tu próximo empleo lo más rápido posible.</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Explora las ofertas</h3>
+        <p>Revisa las vacantes publicadas por empresas verificadas, filtradas por ciudad y categoría.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Contacta directo</h3>
+        <p>Escribe por WhatsApp o correo directamente a la empresa, sin intermediarios ni procesos largos.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Entrevista y contrátate</h3>
+        <p>Coordina tu entrevista y en cuestión de horas puedes tener una respuesta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="cta-band">
+  <div class="container">
+    <h2>¿Listo para dar el siguiente paso?</h2>
+    <p>Explora las ofertas disponibles hoy mismo y aplica en minutos.</p>
+    <a href="/empleos.html" class="btn btn-primary">Ver ofertas de empleo</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>Empleo48h &middot; Bolsa de empleo en Colombia &middot; <a href="/admin.html">Acceso empresas / admin</a></p>
+  </div>
+</footer>
+
+<script>
+fetch('/api/jobs')
+  .then(r => r.json())
+  .then(jobs => {
+    document.getElementById('statJobs').textContent = jobs.length;
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>

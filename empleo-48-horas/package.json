@@ -1,0 +1,12 @@
+{
+  "name": "empleo-48-horas",
+  "version": "1.0.0",
+  "description": "Landing page y bolsa de empleo propia - Consigue empleo en 48 horas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
