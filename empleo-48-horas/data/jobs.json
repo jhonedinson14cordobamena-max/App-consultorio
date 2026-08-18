@@ -1,0 +1,47 @@
+[
+  {
+    "id": "1",
+    "title": "Asesor Comercial",
+    "company": "Empresa Aliada",
+    "city": "Bogotá",
+    "modality": "Presencial",
+    "salary": "$1.600.000 - $2.200.000 + comisiones",
+    "category": "Ventas",
+    "description": "Buscamos asesor comercial con actitud de servicio para atención y venta de productos en punto físico.",
+    "requirements": "Bachiller, experiencia mínima 6 meses en ventas, buena actitud.",
+    "contactType": "whatsapp",
+    "contact": "573000000000",
+    "featured": true,
+    "postedAt": "2026-08-15T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "title": "Auxiliar de Bodega",
+    "company": "Logística Rápida S.A.S.",
+    "city": "Medellín",
+    "modality": "Presencial",
+    "salary": "Salario mínimo + prestaciones",
+    "category": "Logística",
+    "description": "Recepción, alistamiento y despacho de mercancía en centro de distribución.",
+    "requirements": "Bachiller, disponibilidad de turnos rotativos.",
+    "contactType": "whatsapp",
+    "contact": "573000000001",
+    "featured": false,
+    "postedAt": "2026-08-16T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "title": "Atención al Cliente Remoto",
+    "company": "Contact Center Colombia",
+    "city": "Remoto (Colombia)",
+    "modality": "Remoto",
+    "salary": "$1.400.000",
+    "category": "Servicio al cliente",
+    "description": "Atención telefónica y por chat a clientes, resolución de PQR.",
+    "requirements": "Bachiller, buena dicción, PC e internet estable.",
+    "contactType": "email",
+    "contact": "empleos@contactcentercol.com",
+    "featured": true,
+    "postedAt": "2026-08-17T00:00:00.000Z"
+  }
+]

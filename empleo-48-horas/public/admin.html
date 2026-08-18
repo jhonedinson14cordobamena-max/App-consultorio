@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel de Administración | Empleo48h</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">Empleo<span>48h</span></a>
+    <nav class="main-nav">
+      <a href="/empleos.html">Ver ofertas</a>
+      <a href="/">Inicio</a>
+    </nav>
+  </div>
+</header>
+
+<div class="container admin-panel">
+
+  <div id="loginView" class="card">
+    <h2>Acceso administrador</h2>
+    <div id="loginMsg"></div>
+    <div class="form-row">
+      <label for="password">Contraseña</label>
+      <input type="password" id="password" placeholder="Contraseña de administrador" />
+    </div>
+    <button class="btn btn-primary" id="loginBtn" style="width:100%;">Ingresar</button>
+  </div>
+
+  <div id="adminView" style="display:none;">
+    <div class="card">
+      <h2 id="formTitle">Publicar nueva oferta</h2>
+      <div id="formMsg"></div>
+      <input type="hidden" id="jobId" />
+      <div class="form-row">
+        <label for="title">Cargo *</label>
+        <input type="text" id="title" placeholder="Ej: Auxiliar contable" />
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="company">Empresa *</label>
+          <input type="text" id="company" placeholder="Nombre de la empresa" />
+        </div>
+        <div class="form-row">
+          <label for="city">Ciudad *</label>
+          <input type="text" id="city" placeholder="Ej: Bogotá" />
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="modality">Modalidad</label>
+          <select id="modality">
+            <option value="Presencial">Presencial</option>
+            <option value="Remoto">Remoto</option>
+            <option value="Híbrido">Híbrido</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="category">Categoría</label>
+          <input type="text" id="category" placeholder="Ej: Ventas, Logística..." />
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="salary">Salario (opcional)</label>
+        <input type="text" id="salary" placeholder="Ej: $1.500.000 + prestaciones" />
+      </div>
+      <div class="form-row">
+        <label for="description">Descripción</label>
+        <textarea id="description" placeholder="Funciones principales del cargo"></textarea>
+      </div>
+      <div class="form-row">
+        <label for="requirements">Requisitos</label>
+        <textarea id="requirements" placeholder="Experiencia, estudios, habilidades requeridas"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="contactType">Tipo de contacto</label>
+          <select id="contactType">
+            <option value="whatsapp">WhatsApp</option>
+            <option value="email">Correo electrónico</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="contact">Contacto</label>
+          <input type="text" id="contact" placeholder="Número (573001234567) o correo" />
+        </div>
+      </div>
+      <div class="form-row checkbox-row">
+        <input type="checkbox" id="featured" />
+        <label for="featured" style="margin:0;">Marcar como oferta destacada</label>
+      </div>
+      <button class="btn btn-primary" id="saveBtn">Publicar oferta</button>
+      <button class="btn-sm btn-secondary" id="cancelEditBtn" style="display:none; margin-top:10px;">Cancelar edición</button>
+    </div>
+
+    <h3 style="margin-top:32px;">Ofertas publicadas</h3>
+    <div id="adminList" class="admin-list"></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>Empleo48h &middot; Panel de administración</p>
+  </div>
+</footer>
+
+<script>
+const TOKEN_KEY = 'empleo48h_admin_token';
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+
+function showMsg(elId, text, type) {
+  const el = document.getElementById(elId);
+  el.innerHTML = `<div class="msg ${type}">${text}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+async function login() {
+  const password = document.getElementById('password').value;
+  const res = await fetch('/api/admin/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    setToken(data.token);
+    showAdmin();
+  } else {
+    showMsg('loginMsg', 'Contraseña incorrecta.', 'error');
+  }
+}
+
+function showAdmin() {
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('adminView').style.display = 'block';
+  loadJobs();
+}
+
+function resetForm() {
+  document.getElementById('jobId').value = '';
+  document.getElementById('title').value = '';
+  document.getElementById('company').value = '';
+  document.getElementById('city').value = '';
+  document.getElementById('modality').value = 'Presencial';
+  document.getElementById('category').value = '';
+  document.getElementById('salary').value = '';
+  document.getElementById('description').value = '';
+  document.getElementById('requirements').value = '';
+  document.getElementById('contactType').value = 'whatsapp';
+  document.getElementById('contact').value = '';
+  document.getElementById('featured').checked = false;
+  document.getElementById('formTitle').textContent = 'Publicar nueva oferta';
+  document.getElementById('saveBtn').textContent = 'Publicar oferta';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+}
+
+async function loadJobs() {
+  const res = await fetch('/api/jobs');
+  const jobs = await res.json();
+  const list = document.getElementById('adminList');
+  list.innerHTML = '';
+  if (jobs.length === 0) {
+    list.innerHTML = '<p style="color:#5b665f;">Aún no has publicado ofertas.</p>';
+    return;
+  }
+  jobs.forEach(job => {
+    const row = document.createElement('div');
+    row.className = 'admin-job-row';
+    row.innerHTML = `
+      <div>
+        <strong>${job.title}</strong> &mdash; ${job.company} (${job.city})
+      </div>
+      <div>
+        <button class="btn-sm btn-secondary" data-edit="${job.id}">Editar</button>
+        <button class="btn-sm btn-danger" data-delete="${job.id}">Eliminar</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('[data-edit]').forEach(btn => {
+    btn.addEventListener('click', () => editJob(btn.dataset.edit, jobs));
+  });
+  list.querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => deleteJob(btn.dataset.delete));
+  });
+}
+
+function editJob(id, jobs) {
+  const job = jobs.find(j => j.id === id);
+  if (!job) return;
+  document.getElementById('jobId').value = job.id;
+  document.getElementById('title').value = job.title;
+  document.getElementById('company').value = job.company;
+  document.getElementById('city').value = job.city;
+  document.getElementById('modality').value = job.modality;
+  document.getElementById('category').value = job.category || '';
+  document.getElementById('salary').value = job.salary || '';
+  document.getElementById('description').value = job.description || '';
+  document.getElementById('requirements').value = job.requirements || '';
+  document.getElementById('contactType').value = job.contactType;
+  document.getElementById('contact').value = job.contact;
+  document.getElementById('featured').checked = !!job.featured;
+  document.getElementById('formTitle').textContent = 'Editar oferta';
+  document.getElementById('saveBtn').textContent = 'Guardar cambios';
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteJob(id) {
+  if (!confirm('¿Eliminar esta oferta?')) return;
+  const res = await fetch('/api/jobs/' + id, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Token': getToken() }
+  });
+  if (res.ok || res.status === 204) {
+    loadJobs();
+  } else if (res.status === 401) {
+    clearToken();
+    location.reload();
+  }
+}
+
+async function saveJob() {
+  const id = document.getElementById('jobId').value;
+  const payload = {
+    title: document.getElementById('title').value.trim(),
+    company: document.getElementById('company').value.trim(),
+    city: document.getElementById('city').value.trim(),
+    modality: document.getElementById('modality').value,
+    category: document.getElementById('category').value.trim(),
+    salary: document.getElementById('salary').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    requirements: document.getElementById('requirements').value.trim(),
+    contactType: document.getElementById('contactType').value,
+    contact: document.getElementById('contact').value.trim(),
+    featured: document.getElementById('featured').checked
+  };
+
+  if (!payload.title || !payload.company || !payload.city) {
+    showMsg('formMsg', 'Cargo, empresa y ciudad son obligatorios.', 'error');
+    return;
+  }
+
+  const url = id ? '/api/jobs/' + id : '/api/jobs';
+  const method = id ? 'PUT' : 'POST';
+
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Token': getToken() },
+    body: JSON.stringify(payload)
+  });
+
+  if (res.ok) {
+    showMsg('formMsg', id ? 'Oferta actualizada.' : 'Oferta publicada.', 'success');
+    resetForm();
+    loadJobs();
+  } else if (res.status === 401) {
+    clearToken();
+    location.reload();
+  } else {
+    const err = await res.json().catch(() => ({}));
+    showMsg('formMsg', err.error || 'Error al guardar la oferta.', 'error');
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('saveBtn').addEventListener('click', saveJob);
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+
+if (getToken()) {
+  showAdmin();
+}
+</script>
+</body>
+</html>

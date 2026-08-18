@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ofertas de Empleo | Empleo48h</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="logo">Empleo<span>48h</span></a>
+    <nav class="main-nav">
+      <a href="/empleos.html">Ver ofertas</a>
+      <a href="/#como-funciona">Cómo funciona</a>
+      <a href="/admin.html">Publicar oferta</a>
+    </nav>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h1 class="section-title">Ofertas de empleo</h1>
+    <p class="section-subtitle">Vacantes activas en Colombia. Contacta directamente a la empresa.</p>
+
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Buscar por cargo, empresa o palabra clave..." />
+      <select id="cityFilter"><option value="">Todas las ciudades</option></select>
+      <select id="modalityFilter">
+        <option value="">Todas las modalidades</option>
+        <option value="Presencial">Presencial</option>
+        <option value="Remoto">Remoto</option>
+        <option value="Híbrido">Híbrido</option>
+      </select>
+    </div>
+
+    <div id="jobsGrid" class="jobs-grid"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">No se encontraron ofertas con esos filtros.</div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>Empleo48h &middot; Bolsa de empleo en Colombia &middot; <a href="/admin.html">Acceso empresas / admin</a></p>
+  </div>
+</footer>
+
+<script>
+let allJobs = [];
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+function contactUrl(job) {
+  if (job.contactType === 'whatsapp') {
+    const msg = encodeURIComponent(`Hola, vi la oferta "${job.title}" en Empleo48h y quiero aplicar.`);
+    return `https://wa.me/${job.contact}?text=${msg}`;
+  }
+  return `mailto:${job.contact}?subject=${encodeURIComponent('Aplicación: ' + job.title)}`;
+}
+
+function renderJobs(jobs) {
+  const grid = document.getElementById('jobsGrid');
+  const empty = document.getElementById('emptyState');
+  grid.innerHTML = '';
+
+  if (jobs.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  jobs.forEach(job => {
+    const card = document.createElement('div');
+    card.className = 'job-card' + (job.featured ? ' featured' : '');
+    card.innerHTML = `
+      ${job.featured ? '<span class="job-badge">Destacada</span>' : ''}
+      <h3>${escapeHtml(job.title)}</h3>
+      <div class="company">${escapeHtml(job.company)}</div>
+      <div class="meta">
+        <span>${escapeHtml(job.city)}</span>
+        <span>${escapeHtml(job.modality)}</span>
+        ${job.category ? `<span>${escapeHtml(job.category)}</span>` : ''}
+      </div>
+      ${job.salary ? `<div class="salary">${escapeHtml(job.salary)}</div>` : ''}
+      <div class="desc">${escapeHtml(job.description)}</div>
+      <div class="job-actions">
+        <a class="btn-sm ${job.contactType === 'whatsapp' ? 'btn-whatsapp' : 'btn-email'}" target="_blank" rel="noopener" href="${contactUrl(job)}">
+          ${job.contactType === 'whatsapp' ? 'Aplicar por WhatsApp' : 'Aplicar por correo'}
+        </a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function populateCityFilter(jobs) {
+  const select = document.getElementById('cityFilter');
+  const cities = [...new Set(jobs.map(j => j.city))].sort();
+  cities.forEach(city => {
+    const opt = document.createElement('option');
+    opt.value = city;
+    opt.textContent = city;
+    select.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const city = document.getElementById('cityFilter').value;
+  const modality = document.getElementById('modalityFilter').value;
+
+  const filtered = allJobs.filter(job => {
+    const matchesSearch = !search ||
+      job.title.toLowerCase().includes(search) ||
+      job.company.toLowerCase().includes(search) ||
+      (job.category || '').toLowerCase().includes(search);
+    const matchesCity = !city || job.city === city;
+    const matchesModality = !modality || job.modality === modality;
+    return matchesSearch && matchesCity && matchesModality;
+  });
+
+  renderJobs(filtered);
+}
+
+['searchInput', 'cityFilter', 'modalityFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', applyFilters);
+});
+
+fetch('/api/jobs')
+  .then(r => r.json())
+  .then(jobs => {
+    allJobs = jobs;
+    populateCityFilter(jobs);
+    renderJobs(jobs);
+  })
+  .catch(() => {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = 'No se pudieron cargar las ofertas. Intenta de nuevo más tarde.';
+  });
+</script>
+</body>
+</html>
