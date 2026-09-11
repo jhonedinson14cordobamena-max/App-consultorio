@@ -5,6 +5,7 @@ Uso:
     python main.py run --once
     python main.py run
     python main.py reset-halt
+    python main.py webapp
 """
 from __future__ import annotations
 
@@ -96,6 +97,14 @@ def cmd_reset_halt(args: argparse.Namespace) -> None:
     print("Kill switch reactivado. El agente volvera a operar en el proximo ciclo.")
 
 
+def cmd_webapp(args: argparse.Namespace) -> None:
+    from webapp.app import create_app
+
+    app = create_app()
+    logger.info("Panel web disponible en http://%s:%s", args.host, args.port)
+    app.run(host=args.host, port=args.port)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Agente de trading simulado (XTB demo / Alpaca paper / Binance testnet)"
@@ -116,6 +125,13 @@ def main() -> None:
         "reset-halt", help="Reactivar manualmente el agente tras un kill switch"
     )
     reset_halt_parser.set_defaults(func=cmd_reset_halt)
+
+    webapp_parser = subparsers.add_parser(
+        "webapp", help="Levantar el panel web para ver y controlar el agente"
+    )
+    webapp_parser.add_argument("--host", default="0.0.0.0")
+    webapp_parser.add_argument("--port", type=int, default=8000)
+    webapp_parser.set_defaults(func=cmd_webapp)
 
     args = parser.parse_args()
     args.func(args)

@@ -121,11 +121,36 @@ python main.py reset-halt
 
 Muestra el motivo del halt y pide confirmacion explicita antes de reanudar.
 
+### 5. Panel web (sin terminal, con botones)
+
+```bash
+python main.py webapp
+```
+
+Levanta un panel en tu navegador (por defecto en `http://localhost:8000`)
+desde donde puedes, sin escribir comandos:
+
+- Ver el estado (corriendo/detenido, si el kill switch esta activo y por que).
+- Iniciar y detener el agente.
+- Reactivar el kill switch (con confirmacion).
+- Correr un backtest y ver el resultado.
+- Editar la configuracion (`.env`) desde un formulario — los campos de
+  claves/contrasenas se muestran enmascarados y nunca se sobreescriben por
+  accidente si no los tocas.
+- Ver la actividad reciente (log) del agente.
+
+**Si esto corre en un Codespace**: al ejecutar `python main.py webapp`,
+Codespaces detecta el puerto 8000 y te ofrece abrirlo en una pestana nueva
+(o aparece en la pestana "Ports" de la terminal). Por defecto queda en
+visibilidad **Private** (solo tu, con tu sesion de GitHub) — **no lo cambies
+a Public**: el panel no tiene contrasena propia, y cualquiera con la URL
+podria iniciar/detener el agente o cambiar su configuracion.
+
 ## Estructura
 
 ```
 trading-agent/
-├── main.py                    # CLI: backtest / run / reset-halt
+├── main.py                    # CLI: backtest / run / reset-halt / webapp
 ├── src/
 │   ├── config.py               # Carga de .env y validaciones de seguridad
 │   ├── brokers/
@@ -140,6 +165,12 @@ trading-agent/
 │   ├── notifier.py               # Notificaciones por email (best-effort)
 │   ├── agent.py                  # Bucle de evaluacion y decision (agnostico al broker)
 │   └── backtest.py               # Backtester vectorizado
+├── webapp/                    # Panel web (Flask), ver "Panel web" arriba
+│   ├── app.py                  # Rutas / endpoints JSON
+│   ├── env_store.py             # Leer/escribir .env enmascarando secretos
+│   ├── process_manager.py       # Iniciar/detener el agente como subproceso
+│   ├── templates/index.html
+│   └── static/ (style.css, app.js)
 └── tests/                    # Tests unitarios (no requieren red ni API keys)
 ```
 
