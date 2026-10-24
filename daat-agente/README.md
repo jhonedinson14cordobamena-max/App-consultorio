@@ -40,7 +40,7 @@ Acciones nuevas (con código): agregar un caso en `Acciones.kt → ejecutar()`.
 ## Modo Shabbat
 - Ventana: viernes 18:15 → sábado 18:59 (editable en `shabbat.inicio` / `shabbat.fin`).
 - Bloquea apps de bancos/billeteras/apuestas y todos los juegos (las devuelve al inicio).
-- Responde WhatsApp una sola vez por contacto con el mensaje de Shabbat.
+- Responde WhatsApp Business una sola vez por contacto: "Pronto un asesor te estará atendiendo." (sin mencionar Shabbat).
 - No ejecuta tareas programadas.
 
 ## Límites

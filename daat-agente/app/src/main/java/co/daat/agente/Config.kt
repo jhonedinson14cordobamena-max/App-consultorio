@@ -45,7 +45,7 @@ object Config {
       "com.google.android.apps.walletnfcrel"
     ],
     "palabras_bloqueo": ["banco", "bank", "wallet", "casino", "wplay", "rushbet", "apuesta"],
-    "respuesta_whatsapp": "Shabbat Shalom. Estoy fuera de línea hasta el sábado a las 7:00 pm. Te respondo apenas termine."
+    "respuesta_whatsapp": "Pronto un asesor te estará atendiendo."
   },
 
   "whatsapp": {
