@@ -20,7 +20,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Process
 import android.view.Gravity
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -118,22 +117,23 @@ class BloqueoActivity : Activity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(60, 60, 60, 60)
+            setBackgroundColor(Colores.FONDO)
         }
         col.addView(TextView(this).apply {
             text = "🕯️\nShabbat Shalom"
             textSize = 30f
+            setTextColor(Colores.ORO)
             gravity = Gravity.CENTER
             setTypeface(null, Typeface.BOLD)
         })
         col.addView(TextView(this).apply {
             text = "\nEsta app está en pausa hasta que termine Shabbat."
             textSize = 17f
+            setTextColor(Colores.TEXTO)
             gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 60)
         })
-        col.addView(Button(this).apply {
-            text = "Ir al inicio"
-            setOnClickListener { irInicio() }
-        })
+        col.addView(boton("Ir al inicio") { irInicio() })
         setContentView(col)
     }
 

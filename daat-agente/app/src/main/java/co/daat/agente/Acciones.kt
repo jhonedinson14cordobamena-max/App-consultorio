@@ -16,6 +16,25 @@ shabbat_on | shabbat_off | whatsapp_on | whatsapp_off | revisar_anuncios |
 abrir_app (valor = paquete Android) | tocar (texto = botón visible) |
 abrir_y_tocar (valor = paquete, texto = botón) | abrir_url (valor = url) | notificar (texto)"""
 
+    /** Acciones que se pueden elegir en la Agenda (id, nombre visible). */
+    val OPCIONES: List<Pair<String, String>> by lazy {
+        listOf(
+            "revisar_anuncios" to "Revisar pauta de anuncios",
+            "notificar" to "Recordatorio (notificación)",
+            "abrir_app" to "Abrir una app",
+            "abrir_url" to "Abrir un enlace",
+            "shabbat_on" to "Activar Shabbat",
+            "shabbat_off" to "Desactivar Shabbat"
+        ) + if (COMPLETA) listOf(
+            "abrir_y_tocar" to "Abrir app y tocar botón",
+            "tocar" to "Tocar botón en pantalla",
+            "whatsapp_on" to "Activar respuestas WhatsApp",
+            "whatsapp_off" to "Pausar respuestas WhatsApp"
+        ) else emptyList()
+    }
+
+    fun etiqueta(id: String) = OPCIONES.firstOrNull { it.first == id }?.second ?: id
+
     private fun normalizar(s: String) =
         Normalizer.normalize(s.lowercase(), Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "").trim()
 

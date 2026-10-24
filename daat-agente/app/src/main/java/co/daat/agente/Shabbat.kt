@@ -12,7 +12,7 @@ object Shabbat {
         (dt.dayOfWeek.value - 1) * 1440 + dt.hour * 60 + dt.minute
 
     /** "FRI 18:15" -> minuto de la semana */
-    private fun parse(s: String): Int {
+    fun parse(s: String): Int {
         val (d, t) = s.trim().split(Regex("\\s+"))
         val (h, m) = t.split(":").map { it.trim().toInt() }
         return DIAS.indexOf(d.uppercase()) * 1440 + h * 60 + m
@@ -71,5 +71,44 @@ object Shabbat {
             } catch (_: Exception) {}
         }
         return false
+    }
+
+    private val NOMBRES = listOf("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+
+    /** "FRI 18:15" -> "Viernes 6:15 pm" */
+    fun describir(s: String): String = try {
+        val m = parse(s)
+        val dia = NOMBRES[m / 1440]
+        val h = (m % 1440) / 60
+        val min = m % 60
+        val h12 = if (h % 12 == 0) 12 else h % 12
+        "$dia $h12:${"%02d".format(min)} ${if (h < 12) "am" else "pm"}"
+    } catch (_: Exception) { s }
+
+    private fun duracion(min: Int): String {
+        val d = min / 1440
+        val h = (min % 1440) / 60
+        val m = min % 60
+        return when {
+            d > 0 -> "$d d $h h"
+            h > 0 -> "$h h $m min"
+            else -> "$m min"
+        }
+    }
+
+    /** Texto para la pantalla: cuánto falta para empezar o terminar. */
+    fun proximo(ctx: Context): String {
+        val c = Config.load(ctx).optJSONObject("shabbat") ?: return ""
+        val p = Estado.prefs(ctx)
+        val ahora = System.currentTimeMillis()
+        if (ahora < p.getLong("forzado_on", 0)) return "Activado manualmente"
+        if (ahora < p.getLong("forzado_off", 0)) return "Desactivado manualmente hasta el fin"
+        if (!c.optBoolean("activo", true)) return "Horario automático apagado"
+        return try {
+            val n = minutoSemana(LocalDateTime.now())
+            val objetivo = parse(c.optString(if (enVentana(ctx)) "fin" else "inicio"))
+            val falta = ((objetivo - n) % SEMANA + SEMANA) % SEMANA
+            (if (enVentana(ctx)) "Termina en " else "Comienza en ") + duracion(falta)
+        } catch (_: Exception) { "" }
     }
 }

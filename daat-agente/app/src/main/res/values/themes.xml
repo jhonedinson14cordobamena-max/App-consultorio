@@ -1,0 +1,11 @@
+<resources>
+    <style name="Tema.Daat" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/azul</item>
+        <item name="android:colorPrimaryDark">@color/fondo</item>
+        <item name="android:colorAccent">@color/oro</item>
+        <item name="android:windowBackground">@color/fondo</item>
+        <item name="android:statusBarColor">@color/fondo</item>
+        <item name="android:navigationBarColor">@color/tarjeta</item>
+        <item name="android:textColorPrimary">@color/texto</item>
+    </style>
+</resources>

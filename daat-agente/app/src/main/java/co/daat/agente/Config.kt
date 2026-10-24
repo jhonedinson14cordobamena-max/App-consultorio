@@ -26,6 +26,8 @@ object Config {
         null
     } catch (e: Exception) { e.message ?: "JSON inválido" }
 
+    fun guardarJson(ctx: Context, json: JSONObject) = File(ctx.filesDir, ARCHIVO).writeText(json.toString(2))
+
     fun restaurar(ctx: Context) = File(ctx.filesDir, ARCHIVO).writeText(JSONObject(DEFAULT).toString(2))
 
     val DEFAULT = """

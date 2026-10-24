@@ -2,31 +2,30 @@ package co.daat.agente
 
 import android.Manifest
 import android.content.Intent
-import android.graphics.Typeface
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.speech.RecognizerIntent
 import android.speech.tts.TextToSpeech
-import android.widget.Button
-import android.widget.EditText
+import android.view.Gravity
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.NotificationManagerCompat
+import org.json.JSONObject
 import java.util.Locale
 
-private val COMPLETA = BuildConfig.FLAVOR == "completa"
+val COMPLETA = BuildConfig.FLAVOR == "completa"
 
 class MainActivity : ComponentActivity() {
 
-    private lateinit var estado: TextView
-    private lateinit var editor: EditText
+    private lateinit var contenido: FrameLayout
+    private lateinit var nav: LinearLayout
     private var tts: TextToSpeech? = null
+    var pestana = 0
+    var resultado = ""
+    var procesando = false
 
     private val voz = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { r ->
         val frase = r.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
@@ -42,46 +41,19 @@ class MainActivity : ComponentActivity() {
         TaskWorker.programar(this)
         BloqueoService.iniciar(this)
 
-        val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 60, 40, 60) }
-        col.addView(TextView(this).apply { text = "Daat Agente"; textSize = 26f; setTypeface(null, Typeface.BOLD) })
-        estado = TextView(this).apply { textSize = 15f; setPadding(0, 20, 0, 20) }
-        col.addView(estado)
+        val raiz = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setBackgroundColor(Colores.FONDO) }
+        contenido = FrameLayout(this)
+        raiz.addView(contenido, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        nav = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            setBackgroundColor(Colores.TARJETA)
+            setPadding(0, dp(6), 0, dp(6))
+        }
+        raiz.addView(nav)
+        setContentView(raiz)
+        construirNav()
+        mostrar(0)
 
-        fun boton(t: String, f: () -> Unit) = col.addView(Button(this).apply { text = t; setOnClickListener { f() } })
-        boton("🎤  Hablar") { escuchar() }
-        boton("🕯️  Shabbat ON / OFF") {
-            procesarAccion(if (Shabbat.activo(this)) "shabbat_off" else "shabbat_on")
-        }
-        boton("📊  Revisar anuncios ahora") { procesarAccion("revisar_anuncios") }
-        boton("📱  Permiso: Acceso a uso de apps (Shabbat)") { startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
-        boton("🪟  Permiso: Mostrar sobre otras apps (Shabbat)") {
-            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
-        }
-        if (COMPLETA) {
-            boton("♿  Permiso: Accesibilidad (tocar botones)") { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-            boton("🔔  Permiso: Leer notificaciones (WhatsApp Business)") { startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
-        }
-        boton("📜  Ver bitácora") { estado.text = Bitacora.leer(this) }
-
-        col.addView(TextView(this).apply {
-            text = "\n⚙️ Configuración (comandos de voz, tareas, Shabbat, WhatsApp, anuncios)"
-            setTypeface(null, Typeface.BOLD)
-        })
-        editor = EditText(this).apply {
-            typeface = Typeface.MONOSPACE; textSize = 11f; minLines = 18
-            setText(Config.texto(this@MainActivity))
-        }
-        col.addView(editor)
-        boton("💾  Guardar configuración") {
-            val err = Config.guardar(this, editor.text.toString())
-            toast(err?.let { "Error: $it" } ?: "Guardado ✅")
-            refrescar()
-        }
-        boton("↩️  Restaurar configuración inicial") {
-            Config.restaurar(this); editor.setText(Config.texto(this)); toast("Restaurada")
-        }
-
-        setContentView(ScrollView(this).apply { addView(col) })
         if (intent?.getBooleanExtra("escuchar", false) == true) escuchar()
     }
 
@@ -90,31 +62,44 @@ class MainActivity : ComponentActivity() {
         if (intent.getBooleanExtra("escuchar", false)) escuchar()
     }
 
-    override fun onResume() { super.onResume(); refrescar() }
+    override fun onResume() { super.onResume(); mostrar(pestana) }
 
     override fun onDestroy() { tts?.shutdown(); super.onDestroy() }
 
-    private fun refrescar() {
-        val cfg = Config.load(this)
-        val acc = AgentAccessibility.instancia != null
-        val notif = NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
-        val pausado = Estado.prefs(this).getBoolean("whatsapp_pausado", false)
-        estado.text = buildString {
-            appendLine(if (Shabbat.activo(this@MainActivity)) "🕯️ Shabbat ACTIVO" else "☀️ Shabbat inactivo")
-            appendLine((if (BloqueoService.tieneUso(this@MainActivity)) "✅" else "❌") + " Acceso a uso de apps")
-            appendLine((if (Settings.canDrawOverlays(this@MainActivity)) "✅" else "❌") + " Mostrar sobre otras apps")
-            if (COMPLETA) {
-                appendLine((if (acc) "✅" else "❌") + " Accesibilidad")
-                appendLine((if (notif) "✅" else "❌") + " Lectura de WhatsApp")
-                appendLine(if (pausado) "⏸️ Respuestas WhatsApp en pausa" else "💬 Respuestas WhatsApp activas")
-            } else {
-                appendLine("💬 Shabbat en WhatsApp: usa 'Mensaje de ausencia' de WhatsApp Business")
+    private val PESTANAS = listOf("🏠" to "Inicio", "🕯️" to "Shabbat", "🗓️" to "Agenda", "⚙️" to "Ajustes")
+
+    private fun construirNav() {
+        nav.removeAllViews()
+        PESTANAS.forEachIndexed { i, (icono, nombre) ->
+            val activa = i == pestana
+            val item = texto("$icono\n$nombre", 12f, if (activa) Colores.ORO else Colores.SUAVE, activa).apply {
+                gravity = Gravity.CENTER
+                setPadding(0, dp(4), 0, dp(4))
+                setOnClickListener { mostrar(i) }
             }
-            appendLine((if (cfg.optString("claude_api_key").isNotBlank()) "✅" else "❌") + " Clave de Claude")
+            nav.addView(item, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         }
     }
 
-    private fun escuchar() {
+    /** Redibuja la pestaña indicada. */
+    fun mostrar(i: Int) {
+        pestana = i
+        construirNav()
+        contenido.removeAllViews()
+        val col = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(28), dp(18), dp(28))
+        }
+        when (i) {
+            0 -> pantallaInicio(col)
+            1 -> pantallaShabbat(col)
+            2 -> pantallaAgenda(col)
+            else -> pantallaAjustes(col)
+        }
+        contenido.addView(ScrollView(this).apply { addView(col); isFillViewport = true })
+    }
+
+    fun escuchar() {
         val i = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             .putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-CO")
@@ -123,26 +108,32 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun procesar(frase: String) {
-        estado.text = "🗣️ $frase\n⏳ Procesando…"
+        resultado = "🗣️ $frase"
+        procesando = true
+        mostrar(0)
         Thread {
             val cmd = Acciones.interpretar(this, frase)
             val res = if (cmd == null) "No entendí la orden." else Acciones.ejecutar(this, cmd)
-            runOnUiThread { mostrar("🗣️ $frase", res) }
+            runOnUiThread { terminar("🗣️ $frase\n\n$res", res) }
         }.start()
     }
 
-    private fun procesarAccion(accion: String) {
-        estado.text = "⏳ Procesando…"
+    fun accion(accion: String) {
+        procesando = true
+        resultado = ""
+        mostrar(pestana)
         Thread {
-            val res = Acciones.ejecutar(this, org.json.JSONObject().put("accion", accion))
-            runOnUiThread { mostrar("", res) }
+            val res = Acciones.ejecutar(this, JSONObject().put("accion", accion))
+            runOnUiThread { terminar(res, res) }
         }.start()
     }
 
-    private fun mostrar(arriba: String, res: String) {
-        estado.text = (if (arriba.isNotEmpty()) "$arriba\n" else "") + "✅ $res"
-        tts?.speak(res, TextToSpeech.QUEUE_FLUSH, null, "r")
+    private fun terminar(pantalla: String, hablado: String) {
+        procesando = false
+        resultado = pantalla
+        mostrar(pestana)
+        tts?.speak(hablado, TextToSpeech.QUEUE_FLUSH, null, "r")
     }
 
-    private fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()
+    fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()
 }

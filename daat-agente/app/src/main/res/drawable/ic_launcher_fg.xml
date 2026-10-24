@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Anillo dorado -->
+    <path android:strokeColor="#F5B301" android:strokeWidth="4"
+        android:pathData="M28,54 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0" />
+    <!-- Llama (luz / conocimiento) -->
+    <path android:fillColor="#F5B301"
+        android:pathData="M54,34 C60,44 65,49 65,57 C65,63.6 60.1,69 54,69 C47.9,69 43,63.6 43,57 C43,51 47,47 49.5,41.5 C51.5,46 53,48 55.5,49.5 C56,44.5 55.5,39 54,34 Z" />
+    <path android:fillColor="#0B1220"
+        android:pathData="M54,52 C57,56 58.5,58 58.5,61 C58.5,63.8 56.5,66 54,66 C51.5,66 49.5,63.8 49.5,61 C49.5,58 51.5,55.5 54,52 Z" />
+</vector>
