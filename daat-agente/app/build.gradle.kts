@@ -15,6 +15,16 @@ android {
         versionName = "1.0"
     }
 
+    // Firma fija: así cada versión nueva se instala encima sin borrar la configuración.
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("daat.keystore")
+            storePassword = "daatagente"
+            keyAlias = "daat"
+            keyPassword = "daatagente"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
