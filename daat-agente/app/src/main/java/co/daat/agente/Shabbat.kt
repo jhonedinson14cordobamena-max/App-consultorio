@@ -1,6 +1,7 @@
 package co.daat.agente
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import java.time.LocalDateTime
 
 object Shabbat {
@@ -54,5 +55,21 @@ object Shabbat {
         val hasta = if (enVentana(ctx)) System.currentTimeMillis() + minutosHastaFin(ctx) * 60_000L else 0L
         Estado.prefs(ctx).edit().putLong("forzado_off", hasta).putLong("forzado_on", 0).apply()
         Bitacora.add(ctx, "Shabbat desactivado manualmente")
+    }
+
+    /** ¿Esta app se bloquea en Shabbat? (bancos, billeteras, apuestas, juegos) */
+    fun bloqueada(ctx: Context, pkg: String): Boolean {
+        val c = Config.load(ctx).optJSONObject("shabbat") ?: return false
+        val apps = c.optJSONArray("apps_bloqueadas")
+        if (apps != null && (0 until apps.length()).any { apps.getString(it) == pkg }) return true
+        val palabras = c.optJSONArray("palabras_bloqueo")
+        if (palabras != null && (0 until palabras.length()).any { pkg.contains(palabras.getString(it), true) }) return true
+        if (c.optBoolean("bloquear_juegos", true)) {
+            try {
+                val info = ctx.packageManager.getApplicationInfo(pkg, 0)
+                if (info.category == ApplicationInfo.CATEGORY_GAME || info.flags and ApplicationInfo.FLAG_IS_GAME != 0) return true
+            } catch (_: Exception) {}
+        }
+        return false
     }
 }

@@ -3,6 +3,7 @@ package co.daat.agente
 import android.Manifest
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -18,6 +19,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.NotificationManagerCompat
 import java.util.Locale
+
+private val COMPLETA = BuildConfig.FLAVOR == "completa"
 
 class MainActivity : ComponentActivity() {
 
@@ -37,6 +40,7 @@ class MainActivity : ComponentActivity() {
         Notif.canal(this)
         if (Build.VERSION.SDK_INT >= 33) requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
         TaskWorker.programar(this)
+        BloqueoService.iniciar(this)
 
         val col = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(40, 60, 40, 60) }
         col.addView(TextView(this).apply { text = "Daat Agente"; textSize = 26f; setTypeface(null, Typeface.BOLD) })
@@ -49,8 +53,14 @@ class MainActivity : ComponentActivity() {
             procesarAccion(if (Shabbat.activo(this)) "shabbat_off" else "shabbat_on")
         }
         boton("📊  Revisar anuncios ahora") { procesarAccion("revisar_anuncios") }
-        boton("♿  Permiso: Accesibilidad (bloqueo y toques)") { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-        boton("🔔  Permiso: Leer notificaciones (WhatsApp Business)") { startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+        boton("📱  Permiso: Acceso a uso de apps (Shabbat)") { startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
+        boton("🪟  Permiso: Mostrar sobre otras apps (Shabbat)") {
+            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+        }
+        if (COMPLETA) {
+            boton("♿  Permiso: Accesibilidad (tocar botones)") { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+            boton("🔔  Permiso: Leer notificaciones (WhatsApp Business)") { startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+        }
         boton("📜  Ver bitácora") { estado.text = Bitacora.leer(this) }
 
         col.addView(TextView(this).apply {
@@ -91,9 +101,15 @@ class MainActivity : ComponentActivity() {
         val pausado = Estado.prefs(this).getBoolean("whatsapp_pausado", false)
         estado.text = buildString {
             appendLine(if (Shabbat.activo(this@MainActivity)) "🕯️ Shabbat ACTIVO" else "☀️ Shabbat inactivo")
-            appendLine((if (acc) "✅" else "❌") + " Accesibilidad")
-            appendLine((if (notif) "✅" else "❌") + " Lectura de WhatsApp")
-            appendLine(if (pausado) "⏸️ Respuestas WhatsApp en pausa" else "💬 Respuestas WhatsApp activas")
+            appendLine((if (BloqueoService.tieneUso(this@MainActivity)) "✅" else "❌") + " Acceso a uso de apps")
+            appendLine((if (Settings.canDrawOverlays(this@MainActivity)) "✅" else "❌") + " Mostrar sobre otras apps")
+            if (COMPLETA) {
+                appendLine((if (acc) "✅" else "❌") + " Accesibilidad")
+                appendLine((if (notif) "✅" else "❌") + " Lectura de WhatsApp")
+                appendLine(if (pausado) "⏸️ Respuestas WhatsApp en pausa" else "💬 Respuestas WhatsApp activas")
+            } else {
+                appendLine("💬 Shabbat en WhatsApp: usa 'Mensaje de ausencia' de WhatsApp Business")
+            }
             appendLine((if (cfg.optString("claude_api_key").isNotBlank()) "✅" else "❌") + " Clave de Claude")
         }
     }

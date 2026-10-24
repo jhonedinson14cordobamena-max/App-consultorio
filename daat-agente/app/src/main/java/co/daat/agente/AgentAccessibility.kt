@@ -2,7 +2,6 @@ package co.daat.agente
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
-import android.content.pm.ApplicationInfo
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
@@ -36,20 +35,7 @@ class AgentAccessibility : AccessibilityService() {
         }
     }
 
-    private fun bloqueada(pkg: String): Boolean {
-        val c = Config.load(this).optJSONObject("shabbat") ?: return false
-        val apps = c.optJSONArray("apps_bloqueadas")
-        if (apps != null && (0 until apps.length()).any { apps.getString(it) == pkg }) return true
-        val palabras = c.optJSONArray("palabras_bloqueo")
-        if (palabras != null && (0 until palabras.length()).any { pkg.contains(palabras.getString(it), true) }) return true
-        if (c.optBoolean("bloquear_juegos", true)) {
-            try {
-                val info = packageManager.getApplicationInfo(pkg, 0)
-                if (info.category == ApplicationInfo.CATEGORY_GAME || info.flags and ApplicationInfo.FLAG_IS_GAME != 0) return true
-            } catch (_: Exception) {}
-        }
-        return false
-    }
+    private fun bloqueada(pkg: String) = Shabbat.bloqueada(this, pkg)
 
     /** Busca un botón con ese texto en pantalla y lo toca. */
     fun tocarTexto(texto: String): Boolean {

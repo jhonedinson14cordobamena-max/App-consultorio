@@ -47,3 +47,12 @@ Acciones nuevas (con código): agregar un caso en `Acciones.kt → ejecutar()`.
 - Tareas con precisión de ±15 min (límite de Android en segundo plano).
 - No escucha "palabra mágica" permanente (gasta batería): usa el botón **Daat Voz** o "Hey Google, abre Daat Agente".
 - La respuesta de WhatsApp funciona sobre la notificación: si abres el chat antes, ese mensaje no se responde.
+
+## Dos versiones
+- **DaatAgente.apk (segura):** se instala sin bloqueo de Play Protect. Shabbat bloquea apps con "Acceso a uso de apps" + "Mostrar sobre otras apps". Voz, pauta y tareas funcionan. No lee WhatsApp ni toca botones.
+- **DaatAgente-completa.apk:** todo, incluida la respuesta de WhatsApp Business con Claude. Play Protect puede bloquearla.
+
+### Shabbat en WhatsApp Business (versión segura)
+WhatsApp Business → Herramientas para la empresa:
+1. **Horario comercial:** dom–jue abierto 24 h; vie 00:00–18:15; sáb 19:00–23:59.
+2. **Mensaje de ausencia:** activar, texto "Pronto un asesor te estará atendiendo.", programar **Fuera del horario comercial**.

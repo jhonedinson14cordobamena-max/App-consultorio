@@ -27,15 +27,21 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.10.2"
-      - run: gradle assembleDebug
-      - run: cp app/build/outputs/apk/debug/app-debug.apk DaatAgente.apk
+      - run: gradle assembleSeguraDebug assembleCompletaDebug
+      - run: |
+          cp app/build/outputs/apk/segura/debug/app-segura-debug.apk DaatAgente.apk
+          cp app/build/outputs/apk/completa/debug/app-completa-debug.apk DaatAgente-completa.apk
       - uses: actions/upload-artifact@v4
         with:
           name: DaatAgente-apk
-          path: daat-agente/DaatAgente.apk
+          path: |
+            daat-agente/DaatAgente.apk
+            daat-agente/DaatAgente-completa.apk
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: daat-agente-latest
           name: Daat Agente (última versión)
           make_latest: true
-          files: daat-agente/DaatAgente.apk
+          files: |
+            daat-agente/DaatAgente.apk
+            daat-agente/DaatAgente-completa.apk
