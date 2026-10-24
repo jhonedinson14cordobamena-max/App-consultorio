@@ -1,0 +1,41 @@
+name: Daat Agente - compilar APK
+
+# Compila la app Android de la carpeta daat-agente/ y publica el APK
+# en Releases con un enlace fijo de descarga.
+on:
+  push:
+    paths:
+      - "daat-agente/**"
+      - ".github/workflows/daat-agente-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daat-agente
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - run: gradle assembleDebug
+      - run: cp app/build/outputs/apk/debug/app-debug.apk DaatAgente.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DaatAgente-apk
+          path: daat-agente/DaatAgente.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: daat-agente-latest
+          name: Daat Agente (última versión)
+          make_latest: true
+          files: daat-agente/DaatAgente.apk

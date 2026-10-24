@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Daat Agente</string>
+    <string name="tile_label">Daat Voz</string>
+    <string name="acc_desc">Bloquea apps de dinero y juegos durante Shabbat y toca botones en tareas programadas.</string>
+</resources>
