@@ -38,8 +38,8 @@ abrir_y_tocar (valor = paquete, texto = botón) | abrir_url (valor = url) | noti
     private fun normalizar(s: String) =
         Normalizer.normalize(s.lowercase(), Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "").trim()
 
-    /** Frase hablada -> acción. Primero comandos fijos, luego Claude. */
-    fun interpretar(ctx: Context, frase: String): JSONObject? {
+    /** Frase hablada -> acción. Primero comandos fijos, luego Claude. Nunca devuelve null. */
+    fun interpretar(ctx: Context, frase: String): JSONObject {
         val f = normalizar(frase)
         val cmds = Config.load(ctx).optJSONArray("comandos_voz")
         if (cmds != null) for (i in 0 until cmds.length()) {
@@ -47,13 +47,43 @@ abrir_y_tocar (valor = paquete, texto = botón) | abrir_url (valor = url) | noti
             val frases = c.optJSONArray("frases") ?: continue
             if ((0 until frases.length()).any { f.contains(normalizar(frases.getString(it))) }) return c
         }
+        reglasBasicas(f)?.let { return it }
+
+        if (Config.load(ctx).optString("claude_api_key").isBlank()) {
+            return ninguna("No reconozco esa orden y aún no tengo la clave de Claude para entenderla. " +
+                "Pégala en Ajustes. Mientras tanto puedes decir: modo Shabbat, revisa la pauta, abre WhatsApp Business.")
+        }
         val r = Claude.una(
             ctx,
-            "Convierte la orden del usuario en UN objeto JSON {\"accion\",\"valor\",\"texto\"} usando solo estas acciones: $CATALOGO. " +
+            "Convierte la orden del usuario en UN objeto JSON {\"accion\",\"valor\",\"texto\"} usando solo estas acciones: " +
+                OPCIONES.joinToString(", ") { it.first } +
+                ". abrir_app usa valor = paquete Android. " +
+                (if (COMPLETA) "" else "Esta versión NO puede leer ni responder WhatsApp ni tocar botones; si lo piden, explícalo. ") +
                 "Si ninguna aplica responde {\"accion\":\"ninguna\",\"texto\":\"respuesta corta en español\"}. Solo JSON.",
             frase, 200
-        ) ?: return null
-        return try { JSONObject(r.substring(r.indexOf('{'), r.lastIndexOf('}') + 1)) } catch (e: Exception) { null }
+        ) ?: return ninguna("No pude conectar con Claude. Revisa la clave en Ajustes y tu internet.")
+        return try { JSONObject(r.substring(r.indexOf('{'), r.lastIndexOf('}') + 1)) }
+        catch (e: Exception) { ninguna(r.take(200)) }
+    }
+
+    private fun ninguna(t: String) = JSONObject().put("accion", "ninguna").put("texto", t)
+
+    /** Entiende órdenes comunes sin necesitar Claude. */
+    private fun reglasBasicas(f: String): JSONObject? {
+        fun tiene(vararg p: String) = p.any { f.contains(it) }
+        fun a(id: String, valor: String? = null) = JSONObject().put("accion", id).also { if (valor != null) it.put("valor", valor) }
+        return when {
+            tiene("shabbat") && tiene("desactiv", "apag", "termin", "quit") -> a("shabbat_off")
+            tiene("shabbat") -> a("shabbat_on")
+            tiene("pauta", "anuncio", "campana", "publicidad", "meta ads") -> a("revisar_anuncios")
+            tiene("whatsapp") && tiene("abre", "abrir") -> a("abrir_app", "com.whatsapp.w4b")
+            tiene("whatsapp") && tiene("revis", "lee", "mensaje", "respond", "contest") ->
+                if (COMPLETA) a("abrir_app", "com.whatsapp.w4b")
+                else ninguna("En esta versión no puedo leer ni responder WhatsApp: Android bloquea ese permiso. Te abro WhatsApp Business.")
+                    .put("accion", "abrir_app").put("valor", "com.whatsapp.w4b")
+            tiene("bitacora", "que hiciste") -> ninguna("Abre Bitácora en Acciones rápidas.")
+            else -> null
+        }
     }
 
     fun ejecutar(ctx: Context, a: JSONObject): String {
@@ -67,7 +97,7 @@ abrir_y_tocar (valor = paquete, texto = botón) | abrir_url (valor = url) | noti
             "whatsapp_off" -> { Estado.prefs(ctx).edit().putBoolean("whatsapp_pausado", true).apply(); "Respuestas automáticas pausadas." }
             "whatsapp_on" -> { Estado.prefs(ctx).edit().putBoolean("whatsapp_pausado", false).apply(); "Respuestas automáticas activas." }
             "revisar_anuncios" -> if (shabbat) "Es Shabbat, reviso los anuncios al terminar." else Anuncios.revisar(ctx)
-            "abrir_app" -> abrirApp(ctx, valor)
+            "abrir_app" -> (if (texto.isNotBlank()) "$texto " else "") + abrirApp(ctx, valor)
             "tocar" -> if (AgentAccessibility.instancia?.tocarTexto(texto) == true) "Toqué \"$texto\"." else "No encontré \"$texto\" en pantalla."
             "abrir_y_tocar" -> {
                 val r = abrirApp(ctx, valor)

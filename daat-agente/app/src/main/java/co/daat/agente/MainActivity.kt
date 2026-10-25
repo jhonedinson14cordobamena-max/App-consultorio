@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
         mostrar(0)
         Thread {
             val cmd = Acciones.interpretar(this, frase)
-            val res = if (cmd == null) "No entendí la orden." else Acciones.ejecutar(this, cmd)
+            val res = Acciones.ejecutar(this, cmd)
             runOnUiThread { terminar("🗣️ $frase\n\n$res", res) }
         }.start()
     }
